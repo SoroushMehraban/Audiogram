@@ -10,14 +10,11 @@ import android.os.Bundle
 import android.os.Environment
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
 import com.reglardo.audiogram.databinding.ActivityMainBinding
 import java.io.File
 import com.google.gson.Gson
-import org.json.JSONObject
-import java.io.FileReader
 import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
@@ -29,6 +26,19 @@ class MainActivity : AppCompatActivity() {
     private var time = 0.0
     private var startTagTime = 0.0
     private var tagMap: MutableMap<Double, String> = mutableMapOf()
+
+    companion object {
+        fun getTimeStringFromDouble(time: Double): String {
+            val resultInt = time.roundToInt()
+            val hours = resultInt % 86400 / 3600
+            val minutes = resultInt % 86400 % 3600 / 60
+            val seconds  = resultInt % 86400 % 3600 % 60
+
+            return makeTimeString(hours, minutes, seconds)
+        }
+
+        private fun makeTimeString(hours: Int, minutes: Int, seconds: Int): String = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,16 +97,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getTimeStringFromDouble(time: Double): String {
-        val resultInt = time.roundToInt()
-        val hours = resultInt % 86400 / 3600
-        val minutes = resultInt % 86400 % 3600 / 60
-        val seconds  = resultInt % 86400 % 3600 % 60
-
-        return makeTimeString(hours, minutes, seconds)
-    }
-
-    private fun makeTimeString(hours: Int, minutes: Int, seconds: Int): String = String.format("%02d:%02d:%02d", hours, minutes, seconds)
 
     private fun startTimer() {
         serviceIntent.putExtra(TimerService.TIME_EXTRA, time)
@@ -127,9 +127,9 @@ class MainActivity : AppCompatActivity() {
             if(mapStr != "{}") {
                 binding.viewTagLayout.isVisible = true
                 binding.viewTagLayout.setOnClickListener {
-                    val intent = Intent(applicationContext, TagList::class.java)
+                    val intent = Intent(applicationContext, TagListActivity::class.java)
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    intent.putExtra(TagList.MAP_CONTENT, mapStr)
+                    intent.putExtra(TagListActivity.MAP_CONTENT, mapStr)
                     applicationContext.startActivity(intent)
                 }
             }

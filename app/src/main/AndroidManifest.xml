@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Audiogram">
         <activity
-            android:name=".TagList"
+            android:name=".TagListActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
