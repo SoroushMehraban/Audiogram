@@ -1,5 +1,6 @@
 package com.reglardo.audiogram
 
+import android.app.Activity
 import android.content.*
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
@@ -7,13 +8,14 @@ import android.media.MediaRecorder
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
 import com.reglardo.audiogram.databinding.ActivityMainBinding
 import java.io.File
-import java.util.jar.Manifest
-import kotlin.math.min
+import com.google.gson.Gson
 import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
@@ -23,7 +25,8 @@ class MainActivity : AppCompatActivity() {
     private var timerStarted = false
     private lateinit var serviceIntent: Intent
     private var time = 0.0
-    private lateinit var tagMap: MutableMap<String, String>
+    private var startTagTime = 0.0
+    private lateinit var tagMap: MutableMap<Double, String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,12 +47,34 @@ class MainActivity : AppCompatActivity() {
         playRecordingListener(path)
 
         tagBtnListener()
+        submitTagBtnListener()
+    }
+
+    private fun submitTagBtnListener() {
+        binding.submitTagBtn.setOnClickListener {
+            val tagValue = binding.tagTextEditText.text.toString()
+            tagMap.put(startTagTime, tagValue)
+            binding.tagTextEditText.setText("")
+
+            binding.tagBtn.isVisible = true
+            binding.tagLayout.isVisible = false
+
+            hideKeyboard(it)
+        }
+    }
+
+
+    private fun hideKeyboard(view: View) {
+        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     private fun tagBtnListener() {
         binding.tagBtn.setOnClickListener {
             binding.tagBtn.isVisible = false
             binding.tagLayout.isVisible = true
+
+            startTagTime = time
         }
     }
 
@@ -103,8 +128,21 @@ class MainActivity : AppCompatActivity() {
 
             binding.tagBtn.isVisible = false
             binding.tagLayout.isVisible = false
+            Toast.makeText(applicationContext, "${tagMap}", Toast.LENGTH_LONG).show()
 
             stopTimer()
+            saveTagMap()
+        }
+    }
+
+    private fun saveTagMap() {
+        if (tagMap.isNotEmpty()) {
+            val gson = Gson()
+            val tagMapStr = gson.toJson(tagMap)
+
+            val contextWrapper = ContextWrapper(applicationContext)
+            val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+            File(audioDirectory, "testRecording.json").writeText(tagMapStr)
         }
     }
 
@@ -125,6 +163,8 @@ class MainActivity : AppCompatActivity() {
             binding.tagBtn.isVisible = true
 
             startTimer()
+
+            tagMap = mutableMapOf()
         }
     }
 

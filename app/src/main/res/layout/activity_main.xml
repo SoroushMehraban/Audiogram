@@ -129,7 +129,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <ImageButton
-            android:id="@+id/checkBtn"
+            android:id="@+id/submit_tag_btn"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:scaleType="fitXY"
