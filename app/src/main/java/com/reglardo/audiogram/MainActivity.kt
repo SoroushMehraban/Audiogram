@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private var timerStarted = false
     private lateinit var serviceIntent: Intent
     private var time = 0.0
+    private lateinit var tagMap: MutableMap<String, String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +42,15 @@ class MainActivity : AppCompatActivity() {
         startRecordingListener(path)
         stopRecordingListener()
         playRecordingListener(path)
+
+        tagBtnListener()
+    }
+
+    private fun tagBtnListener() {
+        binding.tagBtn.setOnClickListener {
+            binding.tagBtn.isVisible = false
+            binding.tagLayout.isVisible = true
+        }
     }
 
     private val updateTime: BroadcastReceiver = object : BroadcastReceiver() {
@@ -89,6 +99,10 @@ class MainActivity : AppCompatActivity() {
             mediaRecorder.stop()
             binding.startBtn.isVisible = true
             binding.stopBtn.isVisible = false
+            binding.playBtn.isEnabled = true
+
+            binding.tagBtn.isVisible = false
+            binding.tagLayout.isVisible = false
 
             stopTimer()
         }
@@ -104,8 +118,11 @@ class MainActivity : AppCompatActivity() {
             /// start recording
             mediaRecorder.prepare()
             mediaRecorder.start()
+
             binding.startBtn.isVisible = false
             binding.stopBtn.isVisible = true
+            binding.playBtn.isEnabled = false
+            binding.tagBtn.isVisible = true
 
             startTimer()
         }
