@@ -16,6 +16,8 @@ import androidx.core.view.isVisible
 import com.reglardo.audiogram.databinding.ActivityMainBinding
 import java.io.File
 import com.google.gson.Gson
+import org.json.JSONObject
+import java.io.FileReader
 import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
@@ -26,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var serviceIntent: Intent
     private var time = 0.0
     private var startTagTime = 0.0
-    private lateinit var tagMap: MutableMap<Double, String>
+    private var tagMap: MutableMap<Double, String> = mutableMapOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,11 +114,45 @@ class MainActivity : AppCompatActivity() {
 
     private fun playRecordingListener(path: String) {
         binding.playBtn.setOnClickListener {
+            binding.playBtn.isEnabled = false
+            binding.startBtn.isEnabled = false
+
             val mediaPlayer = MediaPlayer()
             mediaPlayer.setDataSource(path)
             mediaPlayer.prepare()
             mediaPlayer.start()
+
+            startTimer()
+            val mapStr = readRecordedTagMap()
+            if(mapStr != "{}") {
+                binding.viewTagLayout.isVisible = true
+                binding.viewTagLayout.setOnClickListener {
+                    val intent = Intent(applicationContext, TagList::class.java)
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    intent.putExtra(TagList.MAP_CONTENT, mapStr)
+                    applicationContext.startActivity(intent)
+                }
+            }
+
+            mediaPlayer.setOnCompletionListener {
+                stopTimer()
+                binding.viewTagLayout.isVisible = false
+
+                binding.playBtn.isEnabled = true
+                binding.startBtn.isEnabled = true
+            }
         }
+    }
+
+    private fun readRecordedTagMap(): String {
+        val contextWrapper = ContextWrapper(applicationContext)
+        val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+
+
+        val bufferedReader = File(audioDirectory,"testRecording.json").bufferedReader()
+        val mapStr = bufferedReader.use{ it.readText() }
+
+        return mapStr
     }
 
     private fun stopRecordingListener() {
@@ -128,7 +164,6 @@ class MainActivity : AppCompatActivity() {
 
             binding.tagBtn.isVisible = false
             binding.tagLayout.isVisible = false
-            Toast.makeText(applicationContext, "${tagMap}", Toast.LENGTH_LONG).show()
 
             stopTimer()
             saveTagMap()
@@ -136,14 +171,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveTagMap() {
-        if (tagMap.isNotEmpty()) {
-            val gson = Gson()
-            val tagMapStr = gson.toJson(tagMap)
+        val gson = Gson()
+        val tagMapStr = gson.toJson(tagMap)
 
-            val contextWrapper = ContextWrapper(applicationContext)
-            val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
-            File(audioDirectory, "testRecording.json").writeText(tagMapStr)
-        }
+        val contextWrapper = ContextWrapper(applicationContext)
+        val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+        File(audioDirectory, "testRecording.json").writeText(tagMapStr)
     }
 
     private fun startRecordingListener(path: String) {
@@ -204,7 +237,6 @@ class MainActivity : AppCompatActivity() {
         val contextWrapper = ContextWrapper(applicationContext)
         val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
         val file = File(audioDirectory, "testRecording.mp3")
-        Toast.makeText(applicationContext, file.path, Toast.LENGTH_LONG).show()
         return file.path
     }
 }
