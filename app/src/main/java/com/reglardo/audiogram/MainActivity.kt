@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.view.isVisible
 import com.reglardo.audiogram.databinding.ActivityMainBinding
 import java.io.File
 import java.util.jar.Manifest
@@ -86,8 +87,8 @@ class MainActivity : AppCompatActivity() {
     private fun stopRecordingListener() {
         binding.stopBtn.setOnClickListener {
             mediaRecorder.stop()
-            binding.startBtn.isEnabled = true
-            binding.stopBtn.isEnabled = false
+            binding.startBtn.isVisible = true
+            binding.stopBtn.isVisible = false
 
             stopTimer()
         }
@@ -103,8 +104,8 @@ class MainActivity : AppCompatActivity() {
             /// start recording
             mediaRecorder.prepare()
             mediaRecorder.start()
-            binding.startBtn.isEnabled = false
-            binding.stopBtn.isEnabled = true
+            binding.startBtn.isVisible = false
+            binding.stopBtn.isVisible = true
 
             startTimer()
         }
@@ -117,7 +118,6 @@ class MainActivity : AppCompatActivity() {
 
         if (recordAudioNotGranted) {
             binding.startBtn.isEnabled = false
-            binding.stopBtn.isEnabled = false
 
             ActivityCompat.requestPermissions(
                 this,
@@ -128,7 +128,6 @@ class MainActivity : AppCompatActivity() {
             )
         } else {
             binding.startBtn.isEnabled = true
-            binding.stopBtn.isEnabled = false
         }
     }
 
