@@ -13,6 +13,7 @@ import android.os.Handler
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.SeekBar
+import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -33,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private var tagMap: MutableMap<Double, String> = mutableMapOf()
     private lateinit var runnable: Runnable
     private var handler = Handler()
+    private val mediaViewModel: MediaViewModel by viewModels()
 
     companion object {
         fun getTimeStringFromDouble(time: Double): String {
@@ -44,8 +46,18 @@ class MainActivity : AppCompatActivity() {
             return makeTimeString(hours, minutes, seconds)
         }
 
+
         private fun makeTimeString(hours: Int, minutes: Int, seconds: Int): String =
             String.format("%02d:%02d:%02d", hours, minutes, seconds)
+    }
+
+    fun changePlayerTime(givenTime: Double) {
+        stopTimer()
+        time = givenTime
+        startTimer()
+
+        binding.seekBar.progress = (givenTime * 1000).toInt()
+        mediaViewModel.mediaPlayer.seekTo((givenTime * 1000).toInt())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -191,22 +203,24 @@ class MainActivity : AppCompatActivity() {
         binding.timer.text = getTimeStringFromDouble(time)
     }
 
+
+
     private fun playRecordingListener(path: String) {
         binding.playBtn.setOnClickListener {
             binding.playBtn.isVisible = false
             binding.pauseBtn.isVisible = true
 
-            val mediaPlayer = MediaPlayer()
-            mediaPlayer.setDataSource(path)
-            mediaPlayer.prepare()
+            mediaViewModel.mediaPlayer = MediaPlayer()
+            mediaViewModel.mediaPlayer.setDataSource(path)
+            mediaViewModel.mediaPlayer.prepare()
 
             binding.seekBar.isEnabled = true
             binding.seekBar.progress = 0
-            binding.seekBar.max = mediaPlayer.duration
+            binding.seekBar.max = mediaViewModel.mediaPlayer.duration
             binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
                     if (p2) {
-                        mediaPlayer.seekTo(p1)
+                        mediaViewModel.mediaPlayer.seekTo(p1)
 
                         stopTimer()
                         time = p1.toDouble() / 1000
@@ -218,10 +232,10 @@ class MainActivity : AppCompatActivity() {
                 override fun onStopTrackingTouch(p0: SeekBar?) {}
             })
 
-            mediaPlayer.start()
+            mediaViewModel.mediaPlayer.start()
 
             runnable = Runnable { // set progress of seekbar with time
-                binding.seekBar.progress = mediaPlayer.currentPosition
+                binding.seekBar.progress = mediaViewModel.mediaPlayer.currentPosition
                 handler.postDelayed(runnable, 100)
             }
 
@@ -237,7 +251,7 @@ class MainActivity : AppCompatActivity() {
             }
 //
             handler.postDelayed(runnable, 100)
-            mediaPlayer.setOnCompletionListener {
+            mediaViewModel.mediaPlayer.setOnCompletionListener {
                 stopTimer()
 //                binding.viewTagLayout.isVisible = false
 
