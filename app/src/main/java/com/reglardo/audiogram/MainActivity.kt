@@ -3,18 +3,23 @@ package com.reglardo.audiogram
 import android.app.Activity
 import android.content.*
 import android.content.pm.PackageManager
+import android.graphics.PorterDuff
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.SeekBar
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.reglardo.audiogram.databinding.ActivityMainBinding
 import java.io.File
 import com.google.gson.Gson
+import com.reglardo.audiogram.adapter.TagAdapter
 import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
@@ -26,18 +31,21 @@ class MainActivity : AppCompatActivity() {
     private var time = 0.0
     private var startTagTime = 0.0
     private var tagMap: MutableMap<Double, String> = mutableMapOf()
+    private lateinit var runnable: Runnable
+    private var handler = Handler()
 
     companion object {
         fun getTimeStringFromDouble(time: Double): String {
             val resultInt = time.roundToInt()
             val hours = resultInt % 86400 / 3600
             val minutes = resultInt % 86400 % 3600 / 60
-            val seconds  = resultInt % 86400 % 3600 % 60
+            val seconds = resultInt % 86400 % 3600 % 60
 
             return makeTimeString(hours, minutes, seconds)
         }
 
-        private fun makeTimeString(hours: Int, minutes: Int, seconds: Int): String = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        private fun makeTimeString(hours: Int, minutes: Int, seconds: Int): String =
+            String.format("%02d:%02d:%02d", hours, minutes, seconds)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,12 +62,82 @@ class MainActivity : AppCompatActivity() {
 
         askAudioPermissionIfNotGranted()
 
+        recordModeListener()
+        playModeListener()
+        editModeListener()
+
         startRecordingListener(path)
         stopRecordingListener()
         playRecordingListener(path)
 
         tagBtnListener()
         submitTagBtnListener()
+    }
+
+    private fun recordModeListener() {
+        binding.recordModeBtn.setOnClickListener { changeMode("RecordMode") }
+        binding.recordModeBtnCaption.setOnClickListener { changeMode("RecordMode") }
+    }
+
+    private fun playModeListener() {
+        binding.playModeBtn.setOnClickListener { changeMode("PlayMode") }
+        binding.playModeBtnCaption.setOnClickListener { changeMode("PlayMode") }
+    }
+
+    private fun editModeListener() {
+        binding.editModeBtn.setOnClickListener { changeMode("EditMode") }
+        binding.editModeBtnCaption.setOnClickListener { changeMode("EditMode") }
+    }
+
+    private fun changeMode(mode: String) {
+        // default colors
+        var recordColor = R.color.primary_dark
+        var playColor = R.color.primary_dark
+        var editColor = R.color.primary_dark
+
+        // default visibilities
+        binding.recorderLayout.visibility = View.GONE
+        binding.tagContainer.visibility = View.GONE
+        binding.seekBar.visibility = View.INVISIBLE
+        binding.playBtn.visibility = View.INVISIBLE
+
+        if (mode == "RecordMode") {
+            recordColor = R.color.secondary_light
+            binding.recorderLayout.visibility = View.VISIBLE
+        }
+        if (mode == "PlayMode") {
+            playColor = R.color.secondary_light
+
+            binding.seekBar.visibility = View.VISIBLE
+            binding.seekBar.isEnabled = false
+
+            binding.playBtn.visibility = View.VISIBLE
+
+            binding.tagContainer.visibility = View.VISIBLE
+        }
+        if (mode == "EditMode") {
+            editColor = R.color.secondary_light
+        }
+
+
+        binding.recordModeBtn.setColorFilter(
+            ContextCompat.getColor(
+                applicationContext,
+                recordColor
+            ), PorterDuff.Mode.SRC_IN
+        )
+        binding.playModeBtn.setColorFilter(
+            ContextCompat.getColor(
+                applicationContext,
+                playColor
+            ), PorterDuff.Mode.SRC_IN
+        )
+        binding.editModeBtn.setColorFilter(
+            ContextCompat.getColor(
+                applicationContext,
+                editColor
+            ), PorterDuff.Mode.SRC_IN
+        )
     }
 
     private fun submitTagBtnListener() {
@@ -77,7 +155,8 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun hideKeyboard(view: View) {
-        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        val inputMethodManager =
+            getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
@@ -114,32 +193,58 @@ class MainActivity : AppCompatActivity() {
 
     private fun playRecordingListener(path: String) {
         binding.playBtn.setOnClickListener {
-            binding.playBtn.isEnabled = false
-            binding.startBtn.isEnabled = false
+            binding.playBtn.isVisible = false
+            binding.pauseBtn.isVisible = true
 
             val mediaPlayer = MediaPlayer()
             mediaPlayer.setDataSource(path)
             mediaPlayer.prepare()
+
+            binding.seekBar.isEnabled = true
+            binding.seekBar.progress = 0
+            binding.seekBar.max = mediaPlayer.duration
+            binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+                    if (p2) {
+                        mediaPlayer.seekTo(p1)
+
+                        stopTimer()
+                        time = p1.toDouble() / 1000
+                        startTimer()
+                    }
+                }
+
+                override fun onStartTrackingTouch(p0: SeekBar?) {}
+                override fun onStopTrackingTouch(p0: SeekBar?) {}
+            })
+
             mediaPlayer.start()
+
+            runnable = Runnable { // set progress of seekbar with time
+                binding.seekBar.progress = mediaPlayer.currentPosition
+                handler.postDelayed(runnable, 100)
+            }
 
             startTimer()
             val mapStr = readRecordedTagMap()
             if(mapStr != "{}") {
-                binding.viewTagLayout.isVisible = true
-                binding.viewTagLayout.setOnClickListener {
-                    val intent = Intent(applicationContext, TagListActivity::class.java)
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    intent.putExtra(TagListActivity.MAP_CONTENT, mapStr)
-                    applicationContext.startActivity(intent)
-                }
-            }
+                var tagMap = mutableMapOf<String, String>()
+                tagMap = Gson().fromJson(mapStr, tagMap.javaClass)
 
+                val recyclerView = binding.tagRecyclerView
+                recyclerView.adapter = TagAdapter(this, tagMap.toList())
+                recyclerView.setHasFixedSize(true)
+            }
+//
+            handler.postDelayed(runnable, 100)
             mediaPlayer.setOnCompletionListener {
                 stopTimer()
-                binding.viewTagLayout.isVisible = false
+//                binding.viewTagLayout.isVisible = false
 
-                binding.playBtn.isEnabled = true
-                binding.startBtn.isEnabled = true
+                binding.playBtn.isVisible = true
+                binding.pauseBtn.isVisible = false
+
+                binding.seekBar.isEnabled = false
             }
         }
     }
@@ -149,18 +254,17 @@ class MainActivity : AppCompatActivity() {
         val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
 
 
-        val bufferedReader = File(audioDirectory,"testRecording.json").bufferedReader()
-        val mapStr = bufferedReader.use{ it.readText() }
+        val bufferedReader = File(audioDirectory, "testRecording.json").bufferedReader()
+        val mapStr = bufferedReader.use { it.readText() }
 
         return mapStr
     }
 
     private fun stopRecordingListener() {
-        binding.stopBtn.setOnClickListener {
+        binding.stopRecordingBtn.setOnClickListener {
             mediaRecorder.stop()
-            binding.startBtn.isVisible = true
-            binding.stopBtn.isVisible = false
-            binding.playBtn.isEnabled = true
+            binding.startRecordingBtn.isVisible = true
+            binding.stopRecordingBtn.isVisible = false
 
             binding.tagBtn.isVisible = false
             binding.tagLayout.isVisible = false
@@ -180,7 +284,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startRecordingListener(path: String) {
-        binding.startBtn.setOnClickListener {
+        binding.startRecordingBtn.setOnClickListener {
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
             mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
             mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB) // for optimizing the speech encoding
@@ -190,9 +294,8 @@ class MainActivity : AppCompatActivity() {
             mediaRecorder.prepare()
             mediaRecorder.start()
 
-            binding.startBtn.isVisible = false
-            binding.stopBtn.isVisible = true
-            binding.playBtn.isEnabled = false
+            binding.startRecordingBtn.isVisible = false
+            binding.stopRecordingBtn.isVisible = true
             binding.tagBtn.isVisible = true
 
             startTimer()
@@ -202,12 +305,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun askAudioPermissionIfNotGranted() {
-        val recordAudioNotGranted = ActivityCompat.checkSelfPermission(this,
+        val recordAudioNotGranted = ActivityCompat.checkSelfPermission(
+            this,
             android.Manifest.permission.RECORD_AUDIO
         ) != PackageManager.PERMISSION_GRANTED
 
         if (recordAudioNotGranted) {
-            binding.startBtn.isEnabled = false
+            binding.startRecordingBtn.isEnabled = false
 
             ActivityCompat.requestPermissions(
                 this,
@@ -217,7 +321,7 @@ class MainActivity : AppCompatActivity() {
                 ), 111
             )
         } else {
-            binding.startBtn.isEnabled = true
+            binding.startRecordingBtn.isEnabled = true
         }
     }
 
@@ -228,8 +332,8 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 111 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            binding.startBtn.isEnabled = true
-            binding.stopBtn.isEnabled = true
+            binding.startRecordingBtn.isEnabled = true
+            binding.stopRecordingBtn.isEnabled = true
         }
     }
 

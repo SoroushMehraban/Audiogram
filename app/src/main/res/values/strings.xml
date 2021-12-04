@@ -9,4 +9,7 @@
     <string name="_00_00_00">00:00:00</string>
     <string name="tag_text">Tag Text</string>
     <string name="view_tags">View Tags</string>
+    <string name="record">Record</string>
+    <string name="play_recordings">Play Recordings</string>
+    <string name="edit">Edit</string>
 </resources>

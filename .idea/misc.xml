@@ -3,7 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Android/Audiogram/app/src/main/res/layout/activity_main.xml" value="0.176" />
+        <entry key="..\:/Android/Audiogram/app/src/main/res/drawable/ic_edit.xml" value="0.20208333333333334" />
+        <entry key="..\:/Android/Audiogram/app/src/main/res/drawable/ic_play_list.xml" value="0.20208333333333334" />
+        <entry key="..\:/Android/Audiogram/app/src/main/res/layout/activity_main.xml" value="0.264" />
         <entry key="..\:/Android/Audiogram/app/src/main/res/layout/activity_tag_list.xml" value="0.25416666666666665" />
         <entry key="..\:/Android/Audiogram/app/src/main/res/layout/list_tag.xml" value="0.264" />
       </map>
