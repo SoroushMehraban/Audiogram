@@ -31,8 +31,6 @@ class MainActivity : AppCompatActivity() {
     private var time = 0.0
     private var startTagTime = 0.0
     private var tagMap: MutableMap<Double, String> = mutableMapOf()
-    private lateinit var runnable: Runnable
-    private var handler = Handler()
     private val mediaViewModel: MediaViewModel by viewModels()
 
     companion object {
@@ -64,6 +62,7 @@ class MainActivity : AppCompatActivity() {
 
         askAudioPermissionIfNotGranted()
 
+        // listeners for buttons above the page (Record, Play Recordings and Edit)
         recordModeListener()
         playModeListener()
         editModeListener()
@@ -75,7 +74,9 @@ class MainActivity : AppCompatActivity() {
         tagBtnListener()
         submitTagBtnListener()
 
-        setRecordingState()
+        setRecordingState() // useful for after rotation. Since current activity is destroyed and
+                            // is created again, we need this function to enable stop recording
+                            // button
     }
 
     private fun setRecordingState() {
@@ -121,10 +122,13 @@ class MainActivity : AppCompatActivity() {
         binding.tagContainer.visibility = View.GONE
         binding.seekBar.visibility = View.INVISIBLE
         binding.playBtn.visibility = View.INVISIBLE
+        binding.pauseBtn.visibility = View.INVISIBLE
+        binding.timer.visibility = View.VISIBLE
 
         if (mode == "RecordMode") {
             recordColor = R.color.secondary_light
             binding.recorderLayout.visibility = View.VISIBLE
+            stopRecordingPlayer()  // in case if it is playing an audio
         }
         if (mode == "PlayMode") {
             playColor = R.color.secondary_light
@@ -138,6 +142,8 @@ class MainActivity : AppCompatActivity() {
         }
         if (mode == "EditMode") {
             editColor = R.color.secondary_light
+            stopRecordingPlayer()  // in case if it is playing an audio
+            binding.timer.visibility = View.INVISIBLE
         }
 
 
@@ -252,10 +258,12 @@ class MainActivity : AppCompatActivity() {
 
             mediaViewModel.mediaPlayer.start()
 
-            runnable = Runnable { // set progress of seekbar with time
-                binding.seekBar.progress = mediaViewModel.mediaPlayer.currentPosition
-                handler.postDelayed(runnable, 100)
-            }
+            Thread {
+                while(mediaViewModel.mediaPlayer.isPlaying) {
+                    binding.seekBar.progress = mediaViewModel.mediaPlayer.currentPosition
+                    Thread.sleep(100)
+                }
+            }.start()
 
             startTimer()
             val mapStr = readRecordedTagMap()
@@ -268,16 +276,33 @@ class MainActivity : AppCompatActivity() {
                 recyclerView.setHasFixedSize(true)
             }
 
-            handler.postDelayed(runnable, 100)
             mediaViewModel.mediaPlayer.setOnCompletionListener {
                 stopTimer()
+                makeTagListEmpty()
 
                 binding.playBtn.isVisible = true
                 binding.pauseBtn.isVisible = false
 
                 binding.seekBar.isEnabled = false
+                binding.seekBar.progress = 0
             }
         }
+    }
+    private fun stopRecordingPlayer() {
+        binding.pauseBtn.isVisible = false
+
+        mediaViewModel.mediaPlayer.stop()
+
+        binding.seekBar.isEnabled = false
+        binding.seekBar.progress = 0
+
+        binding.tagLayout.isVisible = false
+        makeTagListEmpty()
+        stopTimer()
+    }
+
+    private fun makeTagListEmpty() {
+        binding.tagRecyclerView.adapter = TagAdapter(this, listOf())
     }
 
     private fun readRecordedTagMap(): String {

@@ -7,7 +7,8 @@ import androidx.lifecycle.ViewModel
 class MediaViewModel: ViewModel() {
     var mediaPlayer = MediaPlayer()
     val mediaRecorder = MediaRecorder()
-    var _isRecording = false
+
+    private var _isRecording = false
     val isRecording: Boolean
         get() =_isRecording
 
