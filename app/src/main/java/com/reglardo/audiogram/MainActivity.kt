@@ -14,6 +14,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.SeekBar
 import androidx.activity.viewModels
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -126,11 +127,15 @@ class MainActivity : AppCompatActivity() {
         binding.timer.visibility = View.VISIBLE
 
         if (mode == "RecordMode") {
+            changeTimerLocation("top")
+
             recordColor = R.color.secondary_light
             binding.recorderLayout.visibility = View.VISIBLE
             stopRecordingPlayer()  // in case if it is playing an audio
         }
         if (mode == "PlayMode") {
+            changeTimerLocation("bottom")
+
             playColor = R.color.secondary_light
 
             binding.seekBar.visibility = View.VISIBLE
@@ -165,6 +170,21 @@ class MainActivity : AppCompatActivity() {
                 editColor
             ), PorterDuff.Mode.SRC_IN
         )
+    }
+
+    private fun changeTimerLocation(location: String) {
+        if (location == "bottom") {
+            val params = binding.timer.layoutParams as ConstraintLayout.LayoutParams
+            params.topToBottom = ConstraintLayout.LayoutParams.UNSET
+            params.bottomToTop = R.id.navigation_bar
+            binding.timer.requestLayout()
+        }
+        if (location == "top") {
+            val params = binding.timer.layoutParams as ConstraintLayout.LayoutParams
+            params.topToBottom = R.id.play_mode_btn_caption
+            params.bottomToTop = ConstraintLayout.LayoutParams.UNSET
+            binding.timer.requestLayout()
+        }
     }
 
     private fun submitTagBtnListener() {
