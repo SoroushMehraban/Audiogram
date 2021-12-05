@@ -5,11 +5,11 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.PorterDuff
 import android.media.MediaPlayer
-import android.media.MediaRecorder
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.SeekBar
@@ -26,7 +26,6 @@ import kotlin.math.roundToInt
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var mediaRecorder: MediaRecorder
     private var timerStarted = false
     private lateinit var serviceIntent: Intent
     private var time = 0.0
@@ -51,14 +50,7 @@ class MainActivity : AppCompatActivity() {
             String.format("%02d:%02d:%02d", hours, minutes, seconds)
     }
 
-    fun changePlayerTime(givenTime: Double) {
-        stopTimer()
-        time = givenTime
-        startTimer()
 
-        binding.seekBar.progress = (givenTime * 1000).toInt()
-        mediaViewModel.mediaPlayer.seekTo((givenTime * 1000).toInt())
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,8 +59,6 @@ class MainActivity : AppCompatActivity() {
 
         serviceIntent = Intent(applicationContext, TimerService::class.java)
         registerReceiver(updateTime, IntentFilter(TimerService.TIMER_UPDATED))
-
-        mediaRecorder = MediaRecorder()
 
         val path = getFilePath()
 
@@ -84,6 +74,25 @@ class MainActivity : AppCompatActivity() {
 
         tagBtnListener()
         submitTagBtnListener()
+
+        setRecordingState()
+    }
+
+    private fun setRecordingState() {
+        if (mediaViewModel.isRecording) {
+            binding.startRecordingBtn.isVisible = false
+            binding.stopRecordingBtn.isVisible = true
+
+            binding.tagBtn.isVisible = true
+            binding.tagLayout.isVisible = false
+        }
+        else {
+            binding.startRecordingBtn.isVisible = true
+            binding.stopRecordingBtn.isVisible = false
+
+            binding.tagBtn.isVisible = false
+            binding.tagLayout.isVisible = false
+        }
     }
 
     private fun recordModeListener() {
@@ -195,6 +204,15 @@ class MainActivity : AppCompatActivity() {
         timerStarted = true
     }
 
+    fun changePlayerTime(givenTime: Double) {
+        stopTimer()
+        time = givenTime
+        startTimer()
+
+        binding.seekBar.progress = (givenTime * 1000).toInt()
+        mediaViewModel.mediaPlayer.seekTo((givenTime * 1000).toInt())
+    }
+
     private fun stopTimer() {
         stopService(serviceIntent)
         timerStarted = true
@@ -249,11 +267,10 @@ class MainActivity : AppCompatActivity() {
                 recyclerView.adapter = TagAdapter(this, tagMap.toList())
                 recyclerView.setHasFixedSize(true)
             }
-//
+
             handler.postDelayed(runnable, 100)
             mediaViewModel.mediaPlayer.setOnCompletionListener {
                 stopTimer()
-//                binding.viewTagLayout.isVisible = false
 
                 binding.playBtn.isVisible = true
                 binding.pauseBtn.isVisible = false
@@ -276,7 +293,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun stopRecordingListener() {
         binding.stopRecordingBtn.setOnClickListener {
-            mediaRecorder.stop()
+            mediaViewModel.mediaRecorder.stop()
             binding.startRecordingBtn.isVisible = true
             binding.stopRecordingBtn.isVisible = false
 
@@ -299,14 +316,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun startRecordingListener(path: String) {
         binding.startRecordingBtn.setOnClickListener {
-            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
-            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-            mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB) // for optimizing the speech encoding
-            mediaRecorder.setOutputFile(path)
+            mediaViewModel.mediaRecorder.setOutputFile(path)
 
             /// start recording
-            mediaRecorder.prepare()
-            mediaRecorder.start()
+            mediaViewModel.mediaRecorder.prepare()
+            mediaViewModel.mediaRecorder.start()
+            mediaViewModel.changeIsRecordingState(true)
 
             binding.startRecordingBtn.isVisible = false
             binding.stopRecordingBtn.isVisible = true
