@@ -294,6 +294,8 @@ class MainActivity : AppCompatActivity() {
     private fun stopRecordingListener() {
         binding.stopRecordingBtn.setOnClickListener {
             mediaViewModel.mediaRecorder.stop()
+            mediaViewModel.changeIsRecordingState(false)
+
             binding.startRecordingBtn.isVisible = true
             binding.stopRecordingBtn.isVisible = false
 
