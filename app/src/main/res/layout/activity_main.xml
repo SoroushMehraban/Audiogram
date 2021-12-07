@@ -184,11 +184,11 @@
     <FrameLayout
         android:id="@+id/tag_container"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="200dp"
         android:layout_marginTop="20dp"
         app:layout_constraintTop_toBottomOf="@id/play_mode_btn_caption"
         app:layout_constraintStart_toStartOf="parent"
-        android:visibility="gone"
+        android:visibility="visible"
         >
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/tag_recycler_view"

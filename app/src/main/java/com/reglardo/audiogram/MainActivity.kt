@@ -79,6 +79,7 @@ class MainActivity : AppCompatActivity() {
         setRecordingState() // useful for after rotation. Since current activity is destroyed and
                             // is created again, we need this function to enable stop recording
                             // button
+        setPlayingState()   // Again for after rotation
     }
 
     private fun setRecordingState() {
@@ -95,6 +96,23 @@ class MainActivity : AppCompatActivity() {
 
             binding.tagBtn.isVisible = false
             binding.tagLayout.isVisible = false
+        }
+    }
+
+    private fun setPlayingState() {
+        if (mediaViewModel.isPlaying) {
+            changeMode("PlayMode")
+
+            binding.seekBar.isEnabled = true
+            initializeSeekbar()
+            updateTagContainer()
+
+            Thread {
+                while(mediaViewModel.mediaPlayer.isPlaying) {
+                    binding.seekBar.progress = mediaViewModel.mediaPlayer.currentPosition
+                    Thread.sleep(100)
+                }
+            }.start()
         }
     }
 
@@ -262,32 +280,10 @@ class MainActivity : AppCompatActivity() {
                 mediaViewModel.mediaPlayer.setDataSource(path)
                 mediaViewModel.mediaPlayer.prepare()
 
-                binding.seekBar.max = mediaViewModel.mediaPlayer.duration
-                binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                    override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                        if (p2) {
-                            mediaViewModel.mediaPlayer.seekTo(p1)
-
-                            stopTimer()
-                            time = p1.toDouble() / 1000
-                            startTimer()
-                        }
-                    }
-
-                    override fun onStartTrackingTouch(p0: SeekBar?) {}
-                    override fun onStopTrackingTouch(p0: SeekBar?) {}
-                })
+                initializeSeekbar()
                 mediaViewModel.changeIsPlayingState(true)
 
-                val mapStr = readRecordedTagMap()
-                if(mapStr != "{}") {
-                    var tagMap = mutableMapOf<String, String>()
-                    tagMap = Gson().fromJson(mapStr, tagMap.javaClass)
-
-                    val recyclerView = binding.tagRecyclerView
-                    recyclerView.adapter = TagAdapter(this, tagMap.toList())
-                    recyclerView.setHasFixedSize(true)
-                }
+                updateTagContainer()
 
                 mediaViewModel.mediaPlayer.setOnCompletionListener {
                     stopTimer()
@@ -312,6 +308,36 @@ class MainActivity : AppCompatActivity() {
             }.start()
             startTimer()
         }
+    }
+
+    private fun updateTagContainer() {
+        val mapStr = readRecordedTagMap()
+        if (mapStr != "{}") {
+            var tagMap = mutableMapOf<String, String>()
+            tagMap = Gson().fromJson(mapStr, tagMap.javaClass)
+
+            val recyclerView = binding.tagRecyclerView
+            recyclerView.adapter = TagAdapter(this, tagMap.toList())
+            recyclerView.setHasFixedSize(true)
+        }
+    }
+
+    private fun initializeSeekbar() {
+        binding.seekBar.max = mediaViewModel.mediaPlayer.duration
+        binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+                if (p2) {
+                    mediaViewModel.mediaPlayer.seekTo(p1)
+
+                    stopTimer()
+                    time = p1.toDouble() / 1000
+                    startTimer()
+                }
+            }
+
+            override fun onStartTrackingTouch(p0: SeekBar?) {}
+            override fun onStopTrackingTouch(p0: SeekBar?) {}
+        })
     }
 
     private fun pauseAudioListener() {
