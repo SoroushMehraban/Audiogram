@@ -12,6 +12,10 @@ class MediaViewModel: ViewModel() {
     val isRecording: Boolean
         get() =_isRecording
 
+    private var _isPlaying = false
+    val isPlaying: Boolean
+        get() =_isPlaying
+
     init {
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
@@ -21,5 +25,9 @@ class MediaViewModel: ViewModel() {
 
     fun changeIsRecordingState(state: Boolean) {
         _isRecording = state
+    }
+
+    fun changeIsPlayingState(state: Boolean) {
+        _isPlaying = state
     }
 }

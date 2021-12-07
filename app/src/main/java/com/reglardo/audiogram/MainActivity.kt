@@ -8,11 +8,11 @@ import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
-import android.os.Handler
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
@@ -27,7 +27,6 @@ import kotlin.math.roundToInt
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private var timerStarted = false
     private lateinit var serviceIntent: Intent
     private var time = 0.0
     private var startTagTime = 0.0
@@ -70,7 +69,9 @@ class MainActivity : AppCompatActivity() {
 
         startRecordingListener(path)
         stopRecordingListener()
-        playRecordingListener(path)
+
+        playAudioListener(path)
+        pauseAudioListener()
 
         tagBtnListener()
         submitTagBtnListener()
@@ -227,7 +228,6 @@ class MainActivity : AppCompatActivity() {
     private fun startTimer() {
         serviceIntent.putExtra(TimerService.TIME_EXTRA, time)
         startService(serviceIntent)
-        timerStarted = true
     }
 
     fun changePlayerTime(givenTime: Double) {
@@ -241,82 +241,96 @@ class MainActivity : AppCompatActivity() {
 
     private fun stopTimer() {
         stopService(serviceIntent)
-        timerStarted = true
 
         time = 0.0
         binding.timer.text = getTimeStringFromDouble(time)
     }
 
+    private fun pauseTimer() {
+        stopService(serviceIntent)
+    }
 
 
-    private fun playRecordingListener(path: String) {
+
+    private fun playAudioListener(path: String) {
         binding.playBtn.setOnClickListener {
             binding.playBtn.isVisible = false
             binding.pauseBtn.isVisible = true
 
-            mediaViewModel.mediaPlayer = MediaPlayer()
-            mediaViewModel.mediaPlayer.setDataSource(path)
-            mediaViewModel.mediaPlayer.prepare()
+            if (!mediaViewModel.isPlaying) { // playing for the first time
+                mediaViewModel.mediaPlayer = MediaPlayer()
+                mediaViewModel.mediaPlayer.setDataSource(path)
+                mediaViewModel.mediaPlayer.prepare()
 
-            binding.seekBar.isEnabled = true
-            binding.seekBar.progress = 0
-            binding.seekBar.max = mediaViewModel.mediaPlayer.duration
-            binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                    if (p2) {
-                        mediaViewModel.mediaPlayer.seekTo(p1)
+                binding.seekBar.max = mediaViewModel.mediaPlayer.duration
+                binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+                        if (p2) {
+                            mediaViewModel.mediaPlayer.seekTo(p1)
 
-                        stopTimer()
-                        time = p1.toDouble() / 1000
-                        startTimer()
+                            stopTimer()
+                            time = p1.toDouble() / 1000
+                            startTimer()
+                        }
                     }
+
+                    override fun onStartTrackingTouch(p0: SeekBar?) {}
+                    override fun onStopTrackingTouch(p0: SeekBar?) {}
+                })
+                mediaViewModel.changeIsPlayingState(true)
+
+                val mapStr = readRecordedTagMap()
+                if(mapStr != "{}") {
+                    var tagMap = mutableMapOf<String, String>()
+                    tagMap = Gson().fromJson(mapStr, tagMap.javaClass)
+
+                    val recyclerView = binding.tagRecyclerView
+                    recyclerView.adapter = TagAdapter(this, tagMap.toList())
+                    recyclerView.setHasFixedSize(true)
                 }
 
-                override fun onStartTrackingTouch(p0: SeekBar?) {}
-                override fun onStopTrackingTouch(p0: SeekBar?) {}
-            })
+                mediaViewModel.mediaPlayer.setOnCompletionListener {
+                    stopTimer()
+                    makeTagListEmpty()
+                    mediaViewModel.changeIsPlayingState(false)
 
+                    binding.playBtn.isVisible = true
+                    binding.pauseBtn.isVisible = false
+
+                    binding.seekBar.isEnabled = false
+                    binding.seekBar.progress = 0
+                }
+
+            }
+            binding.seekBar.isEnabled = true
             mediaViewModel.mediaPlayer.start()
-
             Thread {
                 while(mediaViewModel.mediaPlayer.isPlaying) {
                     binding.seekBar.progress = mediaViewModel.mediaPlayer.currentPosition
                     Thread.sleep(100)
                 }
             }.start()
-
             startTimer()
-            val mapStr = readRecordedTagMap()
-            if(mapStr != "{}") {
-                var tagMap = mutableMapOf<String, String>()
-                tagMap = Gson().fromJson(mapStr, tagMap.javaClass)
-
-                val recyclerView = binding.tagRecyclerView
-                recyclerView.adapter = TagAdapter(this, tagMap.toList())
-                recyclerView.setHasFixedSize(true)
-            }
-
-            mediaViewModel.mediaPlayer.setOnCompletionListener {
-                stopTimer()
-                makeTagListEmpty()
-
-                binding.playBtn.isVisible = true
-                binding.pauseBtn.isVisible = false
-
-                binding.seekBar.isEnabled = false
-                binding.seekBar.progress = 0
-            }
         }
     }
-    private fun stopRecordingPlayer() {
-        binding.pauseBtn.isVisible = false
 
+    private fun pauseAudioListener() {
+        binding.pauseBtn.setOnClickListener {
+            binding.playBtn.isVisible = true
+            binding.pauseBtn.isVisible = false
+
+            mediaViewModel.mediaPlayer.pause()
+            pauseTimer()
+        }
+    }
+
+
+    private fun stopRecordingPlayer() {
         mediaViewModel.mediaPlayer.stop()
 
         binding.seekBar.isEnabled = false
         binding.seekBar.progress = 0
 
-        binding.tagLayout.isVisible = false
         makeTagListEmpty()
         stopTimer()
     }
