@@ -23,11 +23,12 @@ import com.google.gson.Gson
 import com.reglardo.audiogram.adapter.TagAdapter
 import android.content.Intent
 import android.text.InputType
-import android.util.Log
 import android.widget.EditText
+import com.arthenica.mobileffmpeg.Config.RETURN_CODE_SUCCESS
+import com.arthenica.mobileffmpeg.FFmpeg
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.max
 import kotlin.math.roundToInt
 
 
@@ -92,9 +93,54 @@ class MainActivity : AppCompatActivity() {
 
         fileManagerListener()
 
+        trimSaveListener()
+
         handleFileIntentIfExists() // When activity starts from RecordingListActivity
 
         binding.fileName.text = mediaViewModel.mediaFile
+    }
+
+    private fun trimSaveListener() {
+        binding.saveTrim.setOnClickListener {
+            val trimOutput = binding.trimOutput.text.toString()
+            if (trimOutput == "") {
+                showAlertDialog("Error", "Please enter output file name")
+            }
+            else {
+                val contextWrapper = ContextWrapper(applicationContext)
+                val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+                val file = File("$audioDirectory/$trimOutput.mp3")
+                if (file.exists()) {
+                    showAlertDialog("Error", "Recording with the same name exists. Try another one.")
+                }
+                else {
+                    val startTime = (binding.trimSeekBar.selectedMinValue.toDouble() / 1000).toString()
+                    val durationTime = ((binding.trimSeekBar.selectedMaxValue.toDouble() -
+                                        binding.trimSeekBar.selectedMinValue.toDouble())
+                                        / 1000).toString()
+
+                    val command = "-ss $startTime " +
+                                  "-i ${mediaViewModel.mediaPath} " +
+                                  "-t $durationTime " +
+                                  "$audioDirectory/$trimOutput.mp3"
+                    FFmpeg.executeAsync(command) { _, returnCode ->
+                        if (returnCode == RETURN_CODE_SUCCESS) {
+                            mediaViewModel.setMediaFile("No file selected")
+                            binding.trimSeekBar.isEnabled = false
+
+                            binding.trimOutput.visibility = View.INVISIBLE
+                            binding.saveTrim.visibility = View.INVISIBLE
+
+                            binding.fileName.text = mediaViewModel.mediaFile
+
+                            hideKeyboard(it)
+
+                            showAlertDialog("Success", "Process finished")
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun handleFileIntentIfExists() {
@@ -116,6 +162,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun enableTrimSeekBar() {
         binding.trimSeekBar.isEnabled = true
+
+        binding.trimOutput.visibility = View.VISIBLE
+        binding.saveTrim.visibility = View.VISIBLE
 
         mediaViewModel.mediaPlayer = MediaPlayer()
         mediaViewModel.mediaPlayer.setDataSource(mediaViewModel.mediaPath)
@@ -206,6 +255,7 @@ class MainActivity : AppCompatActivity() {
         var trimColor = R.color.primary_dark
 
         // default visibilities
+        binding.timer.visibility = View.VISIBLE
         binding.recorderLayout.visibility = View.GONE
         binding.tagContainer.visibility = View.GONE
         binding.seekBar.visibility = View.INVISIBLE
@@ -213,10 +263,12 @@ class MainActivity : AppCompatActivity() {
         binding.pauseBtn.visibility = View.INVISIBLE
         binding.fileManagerBtn.visibility = View.INVISIBLE
         binding.fileName.visibility = View.INVISIBLE
+
         binding.trimSeekBar.visibility = View.INVISIBLE
         binding.trimStart.visibility = View.INVISIBLE
         binding.trimEnd.visibility = View.INVISIBLE
-        binding.timer.visibility = View.VISIBLE
+        binding.trimOutput.visibility = View.INVISIBLE
+        binding.saveTrim.visibility = View.INVISIBLE
 
         if (mode == "RecordMode") {
             changeTimerLocation("top")
@@ -253,6 +305,10 @@ class MainActivity : AppCompatActivity() {
 
             if (mediaViewModel.mediaFile == "No file selected")
                 binding.trimSeekBar.isEnabled = false
+            else {
+                binding.trimOutput.visibility = View.VISIBLE
+                binding.saveTrim.visibility = View.VISIBLE
+            }
         }
 
 
@@ -596,5 +652,14 @@ class MainActivity : AppCompatActivity() {
 
         builder.setNegativeButton("Cancel") { dialog, which -> dialog.cancel() }
         builder.show()
+    }
+
+    private fun showAlertDialog(title: String, message: String) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setCancelable(true)
+            .setPositiveButton("OK", null)
+            .show()
     }
 }

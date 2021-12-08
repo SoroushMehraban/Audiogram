@@ -120,6 +120,27 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:visibility="invisible"
         />
+    <EditText
+        android:id="@+id/trim_output"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/output_name"
+        android:layout_marginTop="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/trim_seek_bar"
+        android:visibility="invisible"
+        />
+    <Button
+        android:id="@+id/save_trim"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/save"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/trim_output"
+        android:visibility="invisible"
+    />
 
 
     <androidx.constraintlayout.widget.ConstraintLayout

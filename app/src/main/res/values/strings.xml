@@ -13,4 +13,6 @@
     <string name="play_recordings">Play Recordings</string>
     <string name="edit">Edit</string>
     <string name="trim">Trim</string>
+    <string name="output_name">Output name</string>
+    <string name="save">Save</string>
 </resources>
