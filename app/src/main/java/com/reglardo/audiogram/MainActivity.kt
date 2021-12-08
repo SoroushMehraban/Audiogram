@@ -1,6 +1,7 @@
 package com.reglardo.audiogram
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.PorterDuff
@@ -22,7 +23,14 @@ import com.google.gson.Gson
 import com.reglardo.audiogram.adapter.TagAdapter
 import kotlin.math.roundToInt
 import android.content.Intent
+import android.os.Build
+import android.text.InputType
 import android.util.Log
+import android.widget.EditText
+import androidx.annotation.RequiresApi
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -31,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var serviceIntent: Intent
     private var time = 0.0
     private var startTagTime = 0.0
+    private var lastRecordingName = ""
     private var tagMap: MutableMap<Double, String> = mutableMapOf()
     private val mediaViewModel: MediaViewModel by viewModels()
 
@@ -58,10 +67,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
         serviceIntent = Intent(applicationContext, TimerService::class.java)
         registerReceiver(updateTime, IntentFilter(TimerService.TIMER_UPDATED))
-
-        val path = getFilePath()
 
         askAudioPermissionIfNotGranted()
 
@@ -70,7 +78,7 @@ class MainActivity : AppCompatActivity() {
         playModeListener()
         editModeListener()
 
-        startRecordingListener(path)
+        startRecordingListener()
         stopRecordingListener()
 
         playAudioListener()
@@ -325,7 +333,6 @@ class MainActivity : AppCompatActivity() {
 
                 initializeSeekbar()
                 mediaViewModel.changeIsPlayingState(true)
-
                 updateTagContainer()
 
                 mediaViewModel.mediaPlayer.setOnCompletionListener {
@@ -412,12 +419,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun readRecordedTagMap(): String {
-        val contextWrapper = ContextWrapper(applicationContext)
-        val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+        var mapStr = "{}"
 
-
-        val bufferedReader = File(audioDirectory, "testRecording.json").bufferedReader()
-        val mapStr = bufferedReader.use { it.readText() }
+        val tagFile = File(mediaViewModel.mediaPath.replace(".mp3", ".json"))
+        if (tagFile.exists()) {
+            val bufferedReader = tagFile.bufferedReader()
+            mapStr = bufferedReader.use { it.readText() }
+        }
 
         return mapStr
     }
@@ -434,22 +442,24 @@ class MainActivity : AppCompatActivity() {
             binding.tagLayout.isVisible = false
 
             stopTimer()
-            saveTagMap()
+
+            showGetRecordingNameDialog("Enter voice title")
         }
     }
 
-    private fun saveTagMap() {
+    private fun saveTagMap(tagName: String) {
         val gson = Gson()
         val tagMapStr = gson.toJson(tagMap)
 
         val contextWrapper = ContextWrapper(applicationContext)
         val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
-        File(audioDirectory, "testRecording.json").writeText(tagMapStr)
+        File(audioDirectory, "$tagName.json").writeText(tagMapStr)
     }
 
-    private fun startRecordingListener(path: String) {
+    private fun startRecordingListener() {
+
         binding.startRecordingBtn.setOnClickListener {
-            mediaViewModel.mediaRecorder.setOutputFile(path)
+            mediaViewModel.mediaRecorder.setOutputFile(makePathByCurrentDate())
 
             /// start recording
             mediaViewModel.mediaRecorder.prepare()
@@ -464,6 +474,16 @@ class MainActivity : AppCompatActivity() {
 
             tagMap = mutableMapOf()
         }
+    }
+
+    private fun makePathByCurrentDate(): String {
+        val sdf = SimpleDateFormat("dd-M-yyyy hh:mm:ss")
+        lastRecordingName = sdf.format(Date())
+
+        val contextWrapper = ContextWrapper(applicationContext)
+        val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+        val path = "$audioDirectory/$lastRecordingName.mp3"
+        return path
     }
 
     private fun askAudioPermissionIfNotGranted() {
@@ -507,4 +527,34 @@ class MainActivity : AppCompatActivity() {
         return file.path
     }
 
+    private fun showGetRecordingNameDialog(title: String){
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setTitle(title)
+
+        val input = EditText(this)
+        input.hint = "Enter name"
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        builder.setView(input)
+
+        builder.setPositiveButton("Save", DialogInterface.OnClickListener { dialog, which ->
+            var givenName = input.text.toString()
+
+            val contextWrapper = ContextWrapper(applicationContext)
+            val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+
+            val toFile = File("$audioDirectory/$givenName.mp3")
+            if (toFile.exists()) {
+                showGetRecordingNameDialog("Try another name")
+            }
+            else {
+                val fromFile = File("$audioDirectory/$lastRecordingName.mp3")
+                fromFile.renameTo(toFile)
+
+                saveTagMap(givenName)
+            }
+        })
+
+        builder.setNegativeButton("Cancel") { dialog, which -> dialog.cancel() }
+        builder.show()
+    }
 }
