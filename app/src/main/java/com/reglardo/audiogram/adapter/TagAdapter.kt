@@ -20,7 +20,7 @@ class TagAdapter(
     private val dataset: List<Pair<String, String>>
     ) : RecyclerView.Adapter<TagAdapter.TagViewHolder>() {
 
-    class TagViewHolder(val view: View): RecyclerView.ViewHolder(view) {
+    class TagViewHolder(private val view: View): RecyclerView.ViewHolder(view) {
         val tagCard: LinearLayout = view.findViewById(R.id.tag_card)
         val tagValue: TextView = view.findViewById(R.id.tag_value)
         val tagTime: TextView = view.findViewById(R.id.tag_time)

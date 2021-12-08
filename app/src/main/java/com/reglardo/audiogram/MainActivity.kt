@@ -8,11 +8,9 @@ import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
@@ -23,6 +21,9 @@ import java.io.File
 import com.google.gson.Gson
 import com.reglardo.audiogram.adapter.TagAdapter
 import kotlin.math.roundToInt
+import android.content.Intent
+import android.util.Log
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,6 +35,8 @@ class MainActivity : AppCompatActivity() {
     private val mediaViewModel: MediaViewModel by viewModels()
 
     companion object {
+        const val FILE = "file"
+
         fun getTimeStringFromDouble(time: Double): String {
             val resultInt = time.roundToInt()
             val hours = resultInt % 86400 / 3600
@@ -70,16 +73,46 @@ class MainActivity : AppCompatActivity() {
         startRecordingListener(path)
         stopRecordingListener()
 
-        playAudioListener(path)
+        playAudioListener()
         pauseAudioListener()
 
         tagBtnListener()
         submitTagBtnListener()
 
-        setRecordingState() // useful for after rotation. Since current activity is destroyed and
+        setRecordingState() // Useful for after rotation. Since current activity is destroyed and
                             // is created again, we need this function to enable stop recording
                             // button
         setPlayingState()   // Again for after rotation
+
+        fileManagerListener()
+
+        handleFileIntentIfExists() // When activity starts from RecordingListActivity
+
+        binding.fileName.text = mediaViewModel.mediaFile
+    }
+
+    private fun handleFileIntentIfExists() {
+        val selectedFile = intent?.extras?.getString(FILE)
+        if (selectedFile != null) {
+            val contextWrapper = ContextWrapper(applicationContext)
+            val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+
+            val selectedPath = "$audioDirectory/$selectedFile"
+            mediaViewModel.setMediaPath(selectedPath)
+            mediaViewModel.setMediaFile(selectedFile)
+            changeMode("PlayMode")
+        }
+    }
+
+    private fun fileManagerListener() {
+        binding.fileManagerBtn.setOnClickListener {
+            openRecordingList()
+        }
+    }
+
+    private fun openRecordingList() {
+        val intent = Intent(this, RecordingListActivity::class.java)
+        startActivity(intent)
     }
 
     private fun setRecordingState() {
@@ -142,7 +175,9 @@ class MainActivity : AppCompatActivity() {
         binding.tagContainer.visibility = View.GONE
         binding.seekBar.visibility = View.INVISIBLE
         binding.playBtn.visibility = View.INVISIBLE
+        binding.fileManagerBtn.visibility = View.INVISIBLE
         binding.pauseBtn.visibility = View.INVISIBLE
+        binding.fileName.visibility = View.INVISIBLE
         binding.timer.visibility = View.VISIBLE
 
         if (mode == "RecordMode") {
@@ -161,8 +196,10 @@ class MainActivity : AppCompatActivity() {
             binding.seekBar.isEnabled = false
 
             binding.playBtn.visibility = View.VISIBLE
+            binding.fileManagerBtn.visibility = View.VISIBLE
 
             binding.tagContainer.visibility = View.VISIBLE
+            binding.fileName.visibility = View.VISIBLE
         }
         if (mode == "EditMode") {
             editColor = R.color.secondary_light
@@ -196,12 +233,18 @@ class MainActivity : AppCompatActivity() {
             val params = binding.timer.layoutParams as ConstraintLayout.LayoutParams
             params.topToBottom = ConstraintLayout.LayoutParams.UNSET
             params.bottomToTop = R.id.navigation_bar
+            params.startToStart = ConstraintLayout.LayoutParams.UNSET
+            params.rightMargin = 100
+            binding.timer.layoutParams = params
             binding.timer.requestLayout()
         }
         if (location == "top") {
             val params = binding.timer.layoutParams as ConstraintLayout.LayoutParams
             params.topToBottom = R.id.play_mode_btn_caption
             params.bottomToTop = ConstraintLayout.LayoutParams.UNSET
+            params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            params.rightMargin = 0
+            binding.timer.layoutParams = params
             binding.timer.requestLayout()
         }
     }
@@ -269,15 +312,15 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
-    private fun playAudioListener(path: String) {
+    private fun playAudioListener() {
         binding.playBtn.setOnClickListener {
-            binding.playBtn.isVisible = false
-            binding.pauseBtn.isVisible = true
-
             if (!mediaViewModel.isPlaying) { // playing for the first time
+                if (mediaViewModel.mediaPath == "") {
+                    openRecordingList()
+                    return@setOnClickListener
+                }
                 mediaViewModel.mediaPlayer = MediaPlayer()
-                mediaViewModel.mediaPlayer.setDataSource(path)
+                mediaViewModel.mediaPlayer.setDataSource(mediaViewModel.mediaPath)
                 mediaViewModel.mediaPlayer.prepare()
 
                 initializeSeekbar()
@@ -298,6 +341,9 @@ class MainActivity : AppCompatActivity() {
                 }
 
             }
+            binding.playBtn.isVisible = false
+            binding.pauseBtn.isVisible = true
+
             binding.seekBar.isEnabled = true
             mediaViewModel.mediaPlayer.start()
             Thread {
@@ -456,7 +502,9 @@ class MainActivity : AppCompatActivity() {
     private fun getFilePath(): String {
         val contextWrapper = ContextWrapper(applicationContext)
         val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+
         val file = File(audioDirectory, "testRecording.mp3")
         return file.path
     }
+
 }
