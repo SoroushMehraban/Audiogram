@@ -16,4 +16,6 @@
     <color name="secondary">#bf360c</color>
     <color name="secondary_light">#f9683a</color>
     <color name="secondary_dark">#870000</color>
+
+    <color name="progress_seven">#83807d</color>
 </resources>

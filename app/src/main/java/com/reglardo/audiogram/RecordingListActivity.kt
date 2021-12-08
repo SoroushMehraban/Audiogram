@@ -11,11 +11,16 @@ import java.io.File
 
 class RecordingListActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRecordingListBinding
+    companion object {
+        const val FROM = "from"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRecordingListBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val mainActivityState = intent?.extras?.getString(FROM).toString()
 
         val listOfFiles = mutableListOf<String>()
         val contextWrapper = ContextWrapper(applicationContext)
@@ -29,6 +34,6 @@ class RecordingListActivity : AppCompatActivity() {
         }
 
         val recyclerView = binding.recordingRecyclerView
-        recyclerView.adapter = RecordingAdapter(this, listOfFiles)
+        recyclerView.adapter = RecordingAdapter(mainActivityState, listOfFiles)
     }
 }

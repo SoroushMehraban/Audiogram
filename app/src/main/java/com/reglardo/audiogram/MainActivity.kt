@@ -21,16 +21,14 @@ import com.reglardo.audiogram.databinding.ActivityMainBinding
 import java.io.File
 import com.google.gson.Gson
 import com.reglardo.audiogram.adapter.TagAdapter
-import kotlin.math.roundToInt
 import android.content.Intent
-import android.os.Build
 import android.text.InputType
 import android.util.Log
 import android.widget.EditText
-import androidx.annotation.RequiresApi
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
 import java.util.*
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 
 class MainActivity : AppCompatActivity() {
@@ -73,10 +71,10 @@ class MainActivity : AppCompatActivity() {
 
         askAudioPermissionIfNotGranted()
 
-        // listeners for buttons above the page (Record, Play Recordings and Edit)
+        // listeners for buttons above the page (Record, Play Recordings and trim)
         recordModeListener()
         playModeListener()
-        editModeListener()
+        trimModeListener()
 
         startRecordingListener()
         stopRecordingListener()
@@ -101,6 +99,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleFileIntentIfExists() {
         val selectedFile = intent?.extras?.getString(FILE)
+        val previousState = intent?.extras?.getString(RecordingListActivity.FROM).toString()
         if (selectedFile != null) {
             val contextWrapper = ContextWrapper(applicationContext)
             val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
@@ -108,7 +107,29 @@ class MainActivity : AppCompatActivity() {
             val selectedPath = "$audioDirectory/$selectedFile"
             mediaViewModel.setMediaPath(selectedPath)
             mediaViewModel.setMediaFile(selectedFile)
-            changeMode("PlayMode")
+
+            enableTrimSeekBar()
+
+            changeMode(previousState)
+        }
+    }
+
+    private fun enableTrimSeekBar() {
+        binding.trimSeekBar.isEnabled = true
+
+        mediaViewModel.mediaPlayer = MediaPlayer()
+        mediaViewModel.mediaPlayer.setDataSource(mediaViewModel.mediaPath)
+        mediaViewModel.mediaPlayer.prepare()
+
+        binding.trimEnd.text = getTimeStringFromDouble((mediaViewModel.mediaPlayer.duration / 1000).toDouble())
+
+        binding.trimSeekBar.setRangeValues(0, mediaViewModel.mediaPlayer.duration)
+        binding.trimSeekBar.selectedMinValue = 0
+        binding.trimSeekBar.selectedMaxValue = mediaViewModel.mediaPlayer.duration
+
+        binding.trimSeekBar.setOnRangeSeekBarChangeListener { bar, minValue, maxValue ->
+            binding.trimStart.text = getTimeStringFromDouble(minValue.toString().toDouble() / 1000)
+            binding.trimEnd.text = getTimeStringFromDouble(maxValue.toString().toDouble() / 1000)
         }
     }
 
@@ -120,6 +141,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun openRecordingList() {
         val intent = Intent(this, RecordingListActivity::class.java)
+        if (binding.trimSeekBar.isVisible) { // open trim section after come back
+            intent.putExtra(RecordingListActivity.FROM, "trimMode")
+        }
+        else { // open play section after come back
+            intent.putExtra(RecordingListActivity.FROM, "PlayMode")
+        }
         startActivity(intent)
     }
 
@@ -167,25 +194,28 @@ class MainActivity : AppCompatActivity() {
         binding.playModeBtnCaption.setOnClickListener { changeMode("PlayMode") }
     }
 
-    private fun editModeListener() {
-        binding.editModeBtn.setOnClickListener { changeMode("EditMode") }
-        binding.editModeBtnCaption.setOnClickListener { changeMode("EditMode") }
+    private fun trimModeListener() {
+        binding.trimModeBtn.setOnClickListener { changeMode("trimMode") }
+        binding.trimModeBtnCaption.setOnClickListener { changeMode("trimMode") }
     }
 
     private fun changeMode(mode: String) {
         // default colors
         var recordColor = R.color.primary_dark
         var playColor = R.color.primary_dark
-        var editColor = R.color.primary_dark
+        var trimColor = R.color.primary_dark
 
         // default visibilities
         binding.recorderLayout.visibility = View.GONE
         binding.tagContainer.visibility = View.GONE
         binding.seekBar.visibility = View.INVISIBLE
         binding.playBtn.visibility = View.INVISIBLE
-        binding.fileManagerBtn.visibility = View.INVISIBLE
         binding.pauseBtn.visibility = View.INVISIBLE
+        binding.fileManagerBtn.visibility = View.INVISIBLE
         binding.fileName.visibility = View.INVISIBLE
+        binding.trimSeekBar.visibility = View.INVISIBLE
+        binding.trimStart.visibility = View.INVISIBLE
+        binding.trimEnd.visibility = View.INVISIBLE
         binding.timer.visibility = View.VISIBLE
 
         if (mode == "RecordMode") {
@@ -209,10 +239,20 @@ class MainActivity : AppCompatActivity() {
             binding.tagContainer.visibility = View.VISIBLE
             binding.fileName.visibility = View.VISIBLE
         }
-        if (mode == "EditMode") {
-            editColor = R.color.secondary_light
+        if (mode == "trimMode") {
+            trimColor = R.color.secondary_light
             stopRecordingPlayer()  // in case if it is playing an audio
             binding.timer.visibility = View.INVISIBLE
+
+            binding.trimSeekBar.visibility = View.VISIBLE
+            binding.trimStart.visibility = View.VISIBLE
+            binding.trimEnd.visibility = View.VISIBLE
+
+            binding.fileManagerBtn.visibility = View.VISIBLE
+            binding.fileName.visibility = View.VISIBLE
+
+            if (mediaViewModel.mediaFile == "No file selected")
+                binding.trimSeekBar.isEnabled = false
         }
 
 
@@ -228,10 +268,10 @@ class MainActivity : AppCompatActivity() {
                 playColor
             ), PorterDuff.Mode.SRC_IN
         )
-        binding.editModeBtn.setColorFilter(
+        binding.trimModeBtn.setColorFilter(
             ContextCompat.getColor(
                 applicationContext,
-                editColor
+                trimColor
             ), PorterDuff.Mode.SRC_IN
         )
     }

@@ -12,4 +12,5 @@
     <string name="record">Record</string>
     <string name="play_recordings">Play Recordings</string>
     <string name="edit">Edit</string>
+    <string name="trim">Trim</string>
 </resources>
