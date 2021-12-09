@@ -30,6 +30,12 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
+import android.media.PlaybackParams
+
+import android.media.AudioManager
+
+
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -76,6 +82,10 @@ class MainActivity : AppCompatActivity() {
         recordModeListener()
         playModeListener()
         trimModeListener()
+
+        highPitchListener()
+        lowPitchListener()
+        normalPitchListener()
 
         startRecordingListener()
         stopRecordingListener()
@@ -238,6 +248,16 @@ class MainActivity : AppCompatActivity() {
         binding.recordModeBtnCaption.setOnClickListener { changeMode("RecordMode") }
     }
 
+    private fun highPitchListener() {
+        binding.highPitchBtn.setOnClickListener { mediaViewModel.params.setPitch(1.5f) }
+    }
+    private fun lowPitchListener() {
+        binding.lowPitchBtn.setOnClickListener { mediaViewModel.params.setPitch(0.75f) }
+    }
+    private fun normalPitchListener() {
+        binding.normalPitchBtn.setOnClickListener { mediaViewModel.params.setPitch(1f) }
+    }
+
     private fun playModeListener() {
         binding.playModeBtn.setOnClickListener { changeMode("PlayMode") }
         binding.playModeBtnCaption.setOnClickListener { changeMode("PlayMode") }
@@ -260,6 +280,9 @@ class MainActivity : AppCompatActivity() {
         binding.tagContainer.visibility = View.GONE
         binding.seekBar.visibility = View.INVISIBLE
         binding.playBtn.visibility = View.INVISIBLE
+        binding.highPitchBtn.visibility = View.INVISIBLE
+        binding.lowPitchBtn.visibility = View.INVISIBLE
+        binding.normalPitchBtn.visibility = View.INVISIBLE
         binding.pauseBtn.visibility = View.INVISIBLE
         binding.fileManagerBtn.visibility = View.INVISIBLE
         binding.fileName.visibility = View.INVISIBLE
@@ -286,6 +309,9 @@ class MainActivity : AppCompatActivity() {
             binding.seekBar.isEnabled = false
 
             binding.playBtn.visibility = View.VISIBLE
+            binding.highPitchBtn.visibility = View.VISIBLE
+            binding.lowPitchBtn.visibility = View.VISIBLE
+            binding.normalPitchBtn.visibility = View.VISIBLE
             binding.fileManagerBtn.visibility = View.VISIBLE
 
             binding.tagContainer.visibility = View.VISIBLE
@@ -427,6 +453,7 @@ class MainActivity : AppCompatActivity() {
                 mediaViewModel.mediaPlayer.setDataSource(mediaViewModel.mediaPath)
                 mediaViewModel.mediaPlayer.prepare()
 
+
                 initializeSeekbar()
                 mediaViewModel.changeIsPlayingState(true)
                 updateTagContainer()
@@ -448,6 +475,8 @@ class MainActivity : AppCompatActivity() {
             binding.pauseBtn.isVisible = true
 
             binding.seekBar.isEnabled = true
+            mediaViewModel.mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
+            mediaViewModel.mediaPlayer.playbackParams = mediaViewModel.params
             mediaViewModel.mediaPlayer.start()
             Thread {
                 while(mediaViewModel.mediaPlayer.isPlaying) {

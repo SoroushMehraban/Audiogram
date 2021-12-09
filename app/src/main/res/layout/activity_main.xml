@@ -86,19 +86,18 @@
         app:layout_constraintTop_toBottomOf="@id/trim_mode_btn"
         app:layout_constraintStart_toEndOf="@id/play_mode_btn_caption"
         app:layout_constraintEnd_toEndOf="parent"/>
-    
+
     <TextView
         android:id="@+id/trim_start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/_00_00_00"
         android:layout_marginStart="@dimen/_10sdp"
-        android:textSize="@dimen/_15sdp"
         android:layout_marginTop="@dimen/_30sdp"
-        app:layout_constraintTop_toBottomOf="@id/trim_mode_btn_caption"
-        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/_00_00_00"
+        android:textSize="@dimen/_15sdp"
         android:visibility="invisible"
-        />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/trim_mode_btn_caption" />
     <TextView
         android:id="@+id/trim_end"
         android:layout_width="wrap_content"
@@ -258,13 +257,60 @@
         android:id="@+id/play_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_play"
         android:background="@null"
-        app:layout_constraintBottom_toTopOf="@id/seekBar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@id/seekBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_play"
         app:tint="@color/secondary_light" />
+
+    <ImageButton
+        android:id="@+id/highPitchBtn"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="15dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@id/play_btn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/normalPitchBtn"
+        app:srcCompat="@drawable/high_pitch"
+        app:tint="@color/secondary_light" />
+
+    <ImageButton
+        android:id="@+id/lowPitchBtn"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="15dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@id/play_btn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/normalPitchBtn"
+        app:srcCompat="@drawable/low_pitch"
+        app:tint="@color/secondary_light" />
+
+    <ImageButton
+        android:id="@+id/normalPitchBtn"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="15dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:visibility="invisible"
+        app:layout_constraintStart_toEndOf="@id/lowPitchBtn"
+        app:layout_constraintEnd_toStartOf="@id/highPitchBtn"
+        app:layout_constraintBottom_toTopOf="@id/play_btn"
+        app:srcCompat="@drawable/normal_pitch"
+        app:tint="@color/secondary_light" />
+
+
     <ImageButton
         android:id="@+id/file_manager_btn"
         android:layout_width="wrap_content"

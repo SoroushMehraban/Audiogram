@@ -2,6 +2,7 @@ package com.reglardo.audiogram
 
 import android.media.MediaPlayer
 import android.media.MediaRecorder
+import android.media.PlaybackParams
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,8 @@ import androidx.lifecycle.ViewModel
 class MediaViewModel: ViewModel() {
     var mediaPlayer = MediaPlayer()
     val mediaRecorder = MediaRecorder()
+    val params = PlaybackParams()
+
 
     private var _isRecording = false
     val isRecording: Boolean
@@ -27,9 +30,12 @@ class MediaViewModel: ViewModel() {
         get() = _mediaFile
 
     init {
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-        mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB) // for optimizing the speech encoding
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
+        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+        mediaRecorder.setAudioChannels(2);
+        mediaRecorder.setAudioEncodingBitRate(128000);
+        mediaRecorder.setAudioSamplingRate(44100);
     }
 
 
