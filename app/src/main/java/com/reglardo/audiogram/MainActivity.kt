@@ -33,9 +33,7 @@ import kotlin.math.roundToInt
 import android.media.PlaybackParams
 
 import android.media.AudioManager
-
-
-
+import android.widget.Toast
 
 
 class MainActivity : AppCompatActivity() {
@@ -249,13 +247,88 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun highPitchListener() {
-        binding.highPitchBtn.setOnClickListener { mediaViewModel.params.setPitch(1.5f) }
+        binding.highPitchBtn.setOnClickListener {
+            if (!mediaViewModel.mediaPlayer.isPlaying) {
+                mediaViewModel.params.pitch = 1.5f
+
+                binding.highPitchBtn.setColorFilter(
+                    ContextCompat.getColor(
+                        applicationContext,
+                        R.color.secondary_light
+                    ), PorterDuff.Mode.SRC_IN
+                )
+
+                binding.normalPitchBtn.setColorFilter(
+                    ContextCompat.getColor(
+                        applicationContext,
+                        R.color.primary_dark
+                    ), PorterDuff.Mode.SRC_IN
+                )
+
+                binding.lowPitchBtn.setColorFilter(
+                    ContextCompat.getColor(
+                        applicationContext,
+                        R.color.primary_dark
+                    ), PorterDuff.Mode.SRC_IN
+                )
+            }
+        }
     }
     private fun lowPitchListener() {
-        binding.lowPitchBtn.setOnClickListener { mediaViewModel.params.setPitch(0.75f) }
+        binding.lowPitchBtn.setOnClickListener {
+            if (!mediaViewModel.mediaPlayer.isPlaying) {
+                mediaViewModel.params.pitch = 0.75f
+
+                binding.highPitchBtn.setColorFilter(
+                    ContextCompat.getColor(
+                        applicationContext,
+                        R.color.primary_dark
+                    ), PorterDuff.Mode.SRC_IN
+                )
+
+                binding.normalPitchBtn.setColorFilter(
+                    ContextCompat.getColor(
+                        applicationContext,
+                        R.color.primary_dark
+                    ), PorterDuff.Mode.SRC_IN
+                )
+
+                binding.lowPitchBtn.setColorFilter(
+                    ContextCompat.getColor(
+                        applicationContext,
+                        R.color.secondary_light
+                    ), PorterDuff.Mode.SRC_IN
+                )
+            }
+        }
     }
     private fun normalPitchListener() {
-        binding.normalPitchBtn.setOnClickListener { mediaViewModel.params.setPitch(1f) }
+        binding.normalPitchBtn.setOnClickListener {
+            if (!mediaViewModel.mediaPlayer.isPlaying) {
+                mediaViewModel.params.pitch = 1f
+
+                binding.highPitchBtn.setColorFilter(
+                    ContextCompat.getColor(
+                        applicationContext,
+                        R.color.primary_dark
+                    ), PorterDuff.Mode.SRC_IN
+                )
+
+                binding.normalPitchBtn.setColorFilter(
+                    ContextCompat.getColor(
+                        applicationContext,
+                        R.color.secondary_light
+                    ), PorterDuff.Mode.SRC_IN
+                )
+
+                binding.lowPitchBtn.setColorFilter(
+                    ContextCompat.getColor(
+                        applicationContext,
+                        R.color.primary_dark
+                    ), PorterDuff.Mode.SRC_IN
+                )
+            }
+        }
     }
 
     private fun playModeListener() {
@@ -465,6 +538,7 @@ class MainActivity : AppCompatActivity() {
 
                     binding.playBtn.isVisible = true
                     binding.pauseBtn.isVisible = false
+                    changePitchConstraints("afterComplete")
 
                     binding.seekBar.isEnabled = false
                     binding.seekBar.progress = 0
@@ -473,6 +547,7 @@ class MainActivity : AppCompatActivity() {
             }
             binding.playBtn.isVisible = false
             binding.pauseBtn.isVisible = true
+            changePitchConstraints("afterPlay")
 
             binding.seekBar.isEnabled = true
             mediaViewModel.mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
@@ -485,6 +560,41 @@ class MainActivity : AppCompatActivity() {
                 }
             }.start()
             startTimer()
+        }
+    }
+
+    private fun changePitchConstraints(state: String) {
+        if (state == "afterPlay") {
+            val lowPitchParams = binding.lowPitchBtn.layoutParams as ConstraintLayout.LayoutParams
+            lowPitchParams.bottomToTop = R.id.pause_btn
+            binding.lowPitchBtn.layoutParams = lowPitchParams
+            binding.lowPitchBtn.requestLayout()
+
+            val normalPitchParams = binding.normalPitchBtn.layoutParams as ConstraintLayout.LayoutParams
+            normalPitchParams.bottomToTop = R.id.pause_btn
+            binding.normalPitchBtn.layoutParams = normalPitchParams
+            binding.normalPitchBtn.requestLayout()
+
+            val highPitchParams = binding.highPitchBtn.layoutParams as ConstraintLayout.LayoutParams
+            highPitchParams.bottomToTop = R.id.pause_btn
+            binding.highPitchBtn.layoutParams = highPitchParams
+            binding.highPitchBtn.requestLayout()
+        }
+        else {
+            val lowPitchParams = binding.lowPitchBtn.layoutParams as ConstraintLayout.LayoutParams
+            lowPitchParams.bottomToTop = R.id.play_btn
+            binding.lowPitchBtn.layoutParams = lowPitchParams
+            binding.lowPitchBtn.requestLayout()
+
+            val normalPitchParams = binding.normalPitchBtn.layoutParams as ConstraintLayout.LayoutParams
+            normalPitchParams.bottomToTop = R.id.play_btn
+            binding.normalPitchBtn.layoutParams = normalPitchParams
+            binding.normalPitchBtn.requestLayout()
+
+            val highPitchParams = binding.highPitchBtn.layoutParams as ConstraintLayout.LayoutParams
+            highPitchParams.bottomToTop = R.id.play_btn
+            binding.highPitchBtn.layoutParams = highPitchParams
+            binding.highPitchBtn.requestLayout()
         }
     }
 
@@ -522,6 +632,7 @@ class MainActivity : AppCompatActivity() {
         binding.pauseBtn.setOnClickListener {
             binding.playBtn.isVisible = true
             binding.pauseBtn.isVisible = false
+            changePitchConstraints("afterPause")
 
             mediaViewModel.mediaPlayer.pause()
             pauseTimer()

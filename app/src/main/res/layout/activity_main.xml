@@ -278,7 +278,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/normalPitchBtn"
         app:srcCompat="@drawable/high_pitch"
-        app:tint="@color/secondary_light" />
+        app:tint="@color/primary_dark" />
 
     <ImageButton
         android:id="@+id/lowPitchBtn"
@@ -293,7 +293,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/normalPitchBtn"
         app:srcCompat="@drawable/low_pitch"
-        app:tint="@color/secondary_light" />
+        app:tint="@color/primary_dark" />
 
     <ImageButton
         android:id="@+id/normalPitchBtn"
