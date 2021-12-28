@@ -20,7 +20,6 @@
     <string name="recorder">Recorder</string>
     <string name="notification">Notification</string>
     <string name="profile">Profile</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
@@ -31,4 +30,8 @@
     <string name="password_confirmation">Password Confirmation</string>
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
+    <string name="fill_data_error">Error: Fill all of the data</string>
+    <string name="registered_sucessfully">Registered successfully</string>
+    <string name="data_is_missing_error">Error: Data is missing</string>
+    <string name="email">Email</string>
 </resources>
