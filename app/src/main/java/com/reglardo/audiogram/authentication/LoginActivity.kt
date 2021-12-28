@@ -1,14 +1,17 @@
 package com.reglardo.audiogram.authentication
 
+import android.content.ContextWrapper
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import android.os.Environment
 import androidx.activity.viewModels
+import com.google.gson.Gson
 import com.reglardo.audiogram.MainActivity
 import com.reglardo.audiogram.R
 import com.reglardo.audiogram.databinding.ActivityLoginBinding
 import com.reglardo.audiogram.network.LoginData
+import java.io.File
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -21,7 +24,11 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        openMainActivity() // temporary
+        val token = readToken()
+        if (token != "") {
+            MainActivity.token = token
+            openMainActivity()
+        }
 
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -49,6 +56,7 @@ class LoginActivity : AppCompatActivity() {
                 viewModel.loginAuthenticationResponse.observe(this, {
                     if (it.success) {
                         MainActivity.token = it.message
+                        saveToken(it.message)
                         openMainActivity()
                     } else {
                         binding.errorMsg.text = "Error: ${it.message}"
@@ -65,5 +73,26 @@ class LoginActivity : AppCompatActivity() {
             Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
 
         startActivity(intent)
+    }
+
+    private fun saveToken(token: String) {
+        val contextWrapper = ContextWrapper(applicationContext)
+        val documentDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+        File(documentDirectory, "token.gram").writeText(token)
+    }
+
+    private fun readToken(): String {
+        val contextWrapper = ContextWrapper(applicationContext)
+        val documentDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+
+        var tag = ""
+
+        val tagFile = File(documentDirectory, "token.gram")
+        if (tagFile.exists()) {
+            val bufferedReader = tagFile.bufferedReader()
+            tag = bufferedReader.use { it.readText() }
+        }
+
+        return tag
     }
 }
