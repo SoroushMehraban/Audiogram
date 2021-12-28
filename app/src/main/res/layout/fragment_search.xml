@@ -6,6 +6,29 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.SearchFragment">
 
+    <EditText
+        android:id="@+id/search_field"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:ems="17"
+        android:hint="@string/search_username"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+    <ImageButton
+        android:id="@+id/imageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:src="@drawable/ic_search"
+        app:layout_constraintTop_toTopOf="@id/search_field"
+        app:layout_constraintBottom_toBottomOf="@id/search_field"
+        android:background="@null"
+        app:layout_constraintStart_toEndOf="@id/search_field"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@color/primary_dark" />
+
     <TextView
         android:id="@+id/search_id"
         android:layout_width="wrap_content"

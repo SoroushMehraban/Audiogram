@@ -37,4 +37,5 @@
     <string name="voices">Voices</string>
     <string name="followers">Followers</string>
     <string name="following">Following</string>
+    <string name="search_username">Search username</string>
 </resources>
