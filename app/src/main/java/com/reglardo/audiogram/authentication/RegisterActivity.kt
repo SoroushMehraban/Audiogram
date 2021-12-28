@@ -3,11 +3,7 @@ package com.reglardo.audiogram.authentication
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.viewModels
-import androidx.lifecycle.Observer
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.reglardo.audiogram.MainActivity
 import com.reglardo.audiogram.R
 import com.reglardo.audiogram.databinding.ActivityRegisterBinding
 import com.reglardo.audiogram.network.SignUpData
@@ -25,7 +21,7 @@ class RegisterActivity : AppCompatActivity() {
             val firstName = binding.firstName.text.toString()
             val lastName = binding.lastName.text.toString()
             val email = binding.emailAddress.text.toString()
-            val username = binding.emailAddress.text.toString()
+            val username = binding.username.text.toString()
             val password = binding.password.text.toString()
             val passwordConfirmation = binding.passwordConfirmation.text.toString()
 
@@ -40,7 +36,7 @@ class RegisterActivity : AppCompatActivity() {
                     passwordConfirmation
                 )
                 viewModel.signUp(signUpData)
-                viewModel.signUpResponse.observe(this, {
+                viewModel.signUpAuthenticationResponse.observe(this, {
                     if (it.success) {
                         val intent = Intent(this, LoginActivity::class.java)
                         intent.putExtra(LoginActivity.SIGN_UP, true)

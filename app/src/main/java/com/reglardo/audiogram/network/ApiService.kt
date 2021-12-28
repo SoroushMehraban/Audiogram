@@ -1,7 +1,7 @@
 package com.example.android.marsphotos.network
 
-import com.reglardo.audiogram.network.Response
-import com.reglardo.audiogram.network.SignUpData
+import com.reglardo.audiogram.network.AuthenticationResponse
+import com.reglardo.audiogram.network.InfoResponse
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
@@ -31,18 +31,41 @@ interface AuthenticationApiService {
         @Field("username") username: String,
         @Field("password") password: String,
         @Field("password_confirmation") passwordConfirmation: String,
-    ): Response
+    ): AuthenticationResponse
 
     @POST("user/login/")
     @FormUrlEncoded
     suspend fun login(
         @Field("username") username: String,
         @Field("password") password: String,
-    ): Response
+    ): AuthenticationResponse
 }
+
+interface UserApiService {
+
+    @POST("user/info/")
+    @FormUrlEncoded
+    suspend fun getInfo(
+        @Field("token") token: String,
+        @Field("username") username: String
+    ): InfoResponse
+
+    @POST("user/info/")
+    @FormUrlEncoded
+    suspend fun getMyInfo(
+        @Field("token") token: String,
+    ): InfoResponse
+}
+
 
 object AuthenticationApi {
     val retrofitService : AuthenticationApiService by lazy {
         retrofit.create(AuthenticationApiService::class.java)
+    }
+}
+
+object UserApi{
+    val retrofitService : UserApiService by lazy {
+        retrofit.create(UserApiService::class.java)
     }
 }

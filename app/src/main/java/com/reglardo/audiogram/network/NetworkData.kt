@@ -2,9 +2,20 @@ package com.reglardo.audiogram.network
 
 import com.google.gson.annotations.SerializedName
 
-data class Response (
+data class AuthenticationResponse (
     val success: Boolean,
     val message: String
+)
+
+data class InfoResponse (
+    val success: Boolean,
+    val message: String?,
+    val username: String?,
+    val firstName: String?,
+    val lastName: String?,
+    val followers: Int?,
+    val followings: Int?,
+    val voices: Int?,
 )
 
 data class SignUpData (
@@ -17,6 +28,6 @@ data class SignUpData (
 )
 
 data class LoginData(
-    val email: String,
+    val username: String,
     val password: String
 )

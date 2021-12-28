@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['10.0.2.2']
 # Application definition
 
 INSTALLED_APPS = [
+    'voice',
     'user',
     'django.contrib.admin',
     'django.contrib.auth',

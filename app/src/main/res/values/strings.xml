@@ -34,4 +34,7 @@
     <string name="registered_sucessfully">Registered successfully</string>
     <string name="data_is_missing_error">Error: Data is missing</string>
     <string name="email">Email</string>
+    <string name="voices">Voices</string>
+    <string name="followers">Followers</string>
+    <string name="following">Following</string>
 </resources>
