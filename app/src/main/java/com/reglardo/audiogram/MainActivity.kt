@@ -30,10 +30,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
-import android.media.PlaybackParams
 
 import android.media.AudioManager
-import android.widget.Toast
 
 
 class MainActivity : AppCompatActivity() {

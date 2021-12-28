@@ -366,29 +366,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/play_mode_btn_caption" />
 
-    <LinearLayout
+    <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigation_bar"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:weightSum="2"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:menu="@menu/menu"
+        android:background="@color/primary"
+        app:itemIconTint="@color/white"
+        app:itemTextColor="@color/white" />
 
-        <ImageButton
-            android:id="@+id/socialBtn"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:background="@color/primary"
-            app:srcCompat="@drawable/ic_social" />
-
-        <ImageButton
-            android:id="@+id/recorderBtn"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:background="@color/primary_light"
-            app:srcCompat="@drawable/ic_recorder" />
-    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
