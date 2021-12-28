@@ -1,11 +1,11 @@
 package com.reglardo.audiogram
 
 import android.content.Intent
-import android.content.IntentFilter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.reglardo.audiogram.databinding.ActivityMainBinding
 import androidx.fragment.app.Fragment
+import com.reglardo.audiogram.authentication.LoginActivity
 import com.reglardo.audiogram.fragments.*
 
 
@@ -24,6 +24,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
 
         replaceFragment(recorderFragment)
         binding.navigationBar.selectedItemId = R.id.icon_recorder
