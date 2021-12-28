@@ -12,11 +12,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.reglardo.audiogram.MainActivity
 import com.reglardo.audiogram.MediaViewModel
 import com.reglardo.audiogram.R
+import com.reglardo.audiogram.fragments.RecorderFragment
 
 
 class TagAdapter(
-    private val context: Context,
-    private val dataset: List<Pair<String, String>>
+    private val recorderFragment: RecorderFragment,
+    private val dataset: List<Pair<String, String>>,
     ) : RecyclerView.Adapter<TagAdapter.TagViewHolder>() {
 
     class TagViewHolder(private val view: View): RecyclerView.ViewHolder(view) {
@@ -34,10 +35,10 @@ class TagAdapter(
 
     override fun onBindViewHolder(holder: TagViewHolder, position: Int) {
         val tag = dataset[position]
-        holder.tagTime.text = MainActivity.getTimeStringFromDouble(tag.first.toDouble())
+        holder.tagTime.text = RecorderFragment.getTimeStringFromDouble(tag.first.toDouble())
         holder.tagValue.text = tag.second
         holder.tagCard.setOnClickListener {
-            (context as MainActivity).changePlayerTime(tag.first.toDouble())
+            recorderFragment.changePlayerTime(tag.first.toDouble())
         }
     }
 

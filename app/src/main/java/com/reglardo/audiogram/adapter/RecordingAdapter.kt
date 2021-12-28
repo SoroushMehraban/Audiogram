@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.reglardo.audiogram.MainActivity
 import com.reglardo.audiogram.R
 import com.reglardo.audiogram.RecordingListActivity
+import com.reglardo.audiogram.fragments.RecorderFragment
 
 
 class RecordingAdapter(
@@ -37,7 +38,7 @@ class RecordingAdapter(
         holder.container.setOnClickListener {
             val context = holder.view.context
             val intent = Intent(context, MainActivity::class.java)
-            intent.putExtra(MainActivity.FILE, recording)
+            intent.putExtra(RecorderFragment.FILE, recording)
             intent.putExtra(RecordingListActivity.FROM, mainActivityState)
             context.startActivity(intent)
         }
