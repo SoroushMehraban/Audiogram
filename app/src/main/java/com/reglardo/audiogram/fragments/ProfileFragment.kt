@@ -16,7 +16,6 @@ import com.reglardo.audiogram.fragments.ViewModel.ProfileViewModel
 
 class ProfileFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by viewModels()
-    private val authenticationViewModel: AuthenticationViewModel by viewModels()
 
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!

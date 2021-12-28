@@ -2,6 +2,7 @@ package com.example.android.marsphotos.network
 
 import com.reglardo.audiogram.network.AuthenticationResponse
 import com.reglardo.audiogram.network.InfoResponse
+import com.reglardo.audiogram.network.SearchResponse
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
@@ -20,6 +21,7 @@ private val retrofit = Retrofit.Builder()
     .baseUrl(BASE_URL)
     .build()
 
+// ------------- Authentication
 interface AuthenticationApiService {
 
     @POST("user/sign_up/")
@@ -41,6 +43,13 @@ interface AuthenticationApiService {
     ): AuthenticationResponse
 }
 
+object AuthenticationApi {
+    val retrofitService : AuthenticationApiService by lazy {
+        retrofit.create(AuthenticationApiService::class.java)
+    }
+}
+
+// ------------- User
 interface UserApiService {
 
     @POST("user/info/")
@@ -55,13 +64,13 @@ interface UserApiService {
     suspend fun getMyInfo(
         @Field("token") token: String,
     ): InfoResponse
-}
 
-
-object AuthenticationApi {
-    val retrofitService : AuthenticationApiService by lazy {
-        retrofit.create(AuthenticationApiService::class.java)
-    }
+    @POST("user/search/")
+    @FormUrlEncoded
+    suspend fun searchUsers(
+        @Field("token") token: String,
+        @Field("username") username: String,
+    ): SearchResponse
 }
 
 object UserApi{

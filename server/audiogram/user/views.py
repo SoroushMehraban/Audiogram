@@ -1,7 +1,7 @@
 import hashlib
 
 import django.db.utils
-from django.contrib.auth import logout, login, authenticate
+from django.contrib.auth import authenticate
 
 from voice.models import Voice
 from .models import User, Follow
@@ -25,20 +25,11 @@ def login_view(request):
 
         user = authenticate(request, username=input_data['username'], password=input_data['password'])
         if user is not None:
-            login(request, user)
             return JsonResponse({"success": True, "message": user.token})
         else:
             return JsonResponse({"success": False, "message": "Username or password is wrong"})
 
     return HttpResponse("Login Page")
-
-
-def logout_view(request):
-    if request.method == "POST":
-        logout(request)
-        return JsonResponse({"success": True, "message": ""})
-
-    return HttpResponse("Logout Page")
 
 
 def sign_up_view(request):
@@ -95,15 +86,6 @@ def get_info(request):
             except Exception:
                 return JsonResponse({"success": False, "message": "User not exists"})
 
-        print({
-            "success": True,
-            "username": user.username,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "followers": Follow.objects.filter(following=user).count(),
-            "followings": Follow.objects.filter(follower=user).count(),
-            'voices': Voice.objects.filter(owner=user).count()
-        })
         return JsonResponse({
             "success": True,
             "username": user.username,
@@ -112,4 +94,31 @@ def get_info(request):
             "followers": Follow.objects.filter(following=user).count(),
             "followings": Follow.objects.filter(follower=user).count(),
             'voices': Voice.objects.filter(owner=user).count()
+        })
+
+
+def search_users(request):
+    if request.method == "POST":
+        try:
+            request_user = User.objects.get(token=request.POST.get("token"))
+        except Exception:
+            return JsonResponse({"success": False, "message": "User is not authenticated"})
+
+        username = request.POST.get("username")
+        if username is None:
+            return JsonResponse({"success": False, "message": "Username is None"})
+
+        users = User.objects.filter(username__icontains=username)
+
+        result_users = []
+        for user in users:
+            result_users.append({
+                "username": user.username,
+                "firstName": user.first_name,
+                "lastName": user.last_name
+            })
+
+        return JsonResponse({
+            "success": True,
+            "users": result_users
         })

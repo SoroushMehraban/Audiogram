@@ -18,6 +18,18 @@ data class InfoResponse (
     val voices: Int?,
 )
 
+data class SearchResponse (
+    val success: Boolean,
+    val message: String?,
+    val users: List<UserSearchResponse>?
+)
+
+data class UserSearchResponse(
+    val username: String,
+    val firstName: String,
+    val lastName: String
+)
+
 data class SignUpData (
     @SerializedName("first_name") val firstName: String,
     @SerializedName("last_name") val lastName: String,
