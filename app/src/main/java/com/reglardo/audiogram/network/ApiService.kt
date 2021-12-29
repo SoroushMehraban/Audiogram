@@ -1,11 +1,12 @@
 package com.example.android.marsphotos.network
 
 import com.example.android.marsphotos.network.URL.BASE_URL
-import com.reglardo.audiogram.network.AuthenticationResponse
+import com.reglardo.audiogram.network.GeneralResponse
 import com.reglardo.audiogram.network.InfoResponse
 import com.reglardo.audiogram.network.SearchResponse
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import okhttp3.MultipartBody
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
@@ -36,14 +37,14 @@ interface AuthenticationApiService {
         @Field("username") username: String,
         @Field("password") password: String,
         @Field("password_confirmation") passwordConfirmation: String,
-    ): AuthenticationResponse
+    ): GeneralResponse
 
     @POST("user/login/")
     @FormUrlEncoded
     suspend fun login(
         @Field("username") username: String,
         @Field("password") password: String,
-    ): AuthenticationResponse
+    ): GeneralResponse
 }
 
 object AuthenticationApi {
@@ -74,6 +75,13 @@ interface UserApiService {
         @Field("token") token: String,
         @Field("username") username: String,
     ): SearchResponse
+
+    @POST("user/upload_profile_image/")
+    @Multipart
+    suspend fun uploadImage(
+        @Part("token") token: String,
+        @Part image: MultipartBody.Part,
+    ): GeneralResponse
 }
 
 object UserApi{

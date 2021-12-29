@@ -74,13 +74,15 @@ def sign_up_view(request):
 def get_info(request):
     if request.method == "POST":
         try:
-            print(request.POST)
-            user = User.objects.get(token=request.POST.get("token"))
+            token = request.POST.get("token")
+            request_user = User.objects.get(token=token)
         except Exception:
             return JsonResponse({"success": False, "message": "User is not authenticated"})
 
         username = request.POST.get("username")
-        if username is not None:
+        if username is None:
+            user = request_user
+        else:
             try:
                 user = User.objects.get(username=username)
             except Exception:
@@ -94,14 +96,16 @@ def get_info(request):
             "image": user.image.url,
             "followers": Follow.objects.filter(following=user).count(),
             "followings": Follow.objects.filter(follower=user).count(),
-            'voices': Voice.objects.filter(owner=user).count()
+            'voices': Voice.objects.filter(owner=user).count(),
+            'isMe': user.token == token,
+            'isFollowed': Follow.objects.filter(follower=request_user, following=user).count() > 0
         })
 
 
 def search_users(request):
     if request.method == "POST":
         try:
-            request_user = User.objects.get(token=request.POST.get("token"))
+            User.objects.get(token=request.POST.get("token"))
         except Exception:
             return JsonResponse({"success": False, "message": "User is not authenticated"})
 
@@ -124,3 +128,22 @@ def search_users(request):
             "success": True,
             "users": result_users
         })
+
+
+def upload_profile_image(request):
+    if request.method == "POST":
+        try:
+            token = request.POST.get("token")[1:-1]
+            request_user = User.objects.get(token=token)
+        except Exception:
+            return JsonResponse({"success": False, "message": "User is not authenticated"})
+
+        image_file = request.FILES.get('file')
+        request_user.image = image_file
+        request_user.save()
+        return JsonResponse({
+            "success": True,
+            "message": "Profile image is updated."
+        })
+
+

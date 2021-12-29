@@ -39,4 +39,5 @@
     <string name="following">Following</string>
     <string name="search_username">Search username</string>
     <string name="no_user_found">No user found</string>
+    <string name="change_profile">Change Profile</string>
 </resources>

@@ -1,5 +1,6 @@
 *.iml
 .gradle
+server/audiogram/media/profiles
 /local.properties
 /.idea/caches
 /.idea/libraries

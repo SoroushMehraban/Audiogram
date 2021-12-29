@@ -3,6 +3,7 @@ package com.reglardo.audiogram
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import com.reglardo.audiogram.databinding.ActivityMainBinding
 import androidx.fragment.app.Fragment
 import com.reglardo.audiogram.authentication.LoginActivity

@@ -2,10 +2,12 @@ package com.reglardo.audiogram.authentication
 
 import android.content.ContextWrapper
 import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
 import androidx.activity.viewModels
+import androidx.core.app.ActivityCompat
 import com.google.gson.Gson
 import com.reglardo.audiogram.MainActivity
 import com.reglardo.audiogram.R
@@ -23,6 +25,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        askPermissionIfNotGranted()
 
         val token = readToken()
         if (token != "") {
@@ -94,5 +97,25 @@ class LoginActivity : AppCompatActivity() {
         }
 
         return tag
+    }
+
+    private fun askPermissionIfNotGranted() {
+        val recordAudioNotGranted = ActivityCompat.checkSelfPermission(
+            applicationContext,
+            android.Manifest.permission.RECORD_AUDIO
+        ) != PackageManager.PERMISSION_GRANTED
+
+        if (recordAudioNotGranted) {
+
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    android.Manifest.permission.RECORD_AUDIO,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE
+                ), 111
+            )
+        } else {
+        }
     }
 }
