@@ -27,6 +27,7 @@ data class SearchResponse (
 
 data class UserSearchResponse(
     val username: String,
+    val image: String,
     val firstName: String,
     val lastName: String
 )

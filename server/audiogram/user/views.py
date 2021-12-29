@@ -115,6 +115,7 @@ def search_users(request):
         for user in users:
             result_users.append({
                 "username": user.username,
+                "image": user.image.url,
                 "firstName": user.first_name,
                 "lastName": user.last_name
             })

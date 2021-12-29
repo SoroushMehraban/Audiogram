@@ -1,12 +1,16 @@
 package com.reglardo.audiogram.fragments
 
+import android.app.Activity
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.viewModels
+import com.reglardo.audiogram.adapter.RecordingAdapter
+import com.reglardo.audiogram.adapter.SearchAdapter
 import com.reglardo.audiogram.databinding.FragmentSearchBinding
 import com.reglardo.audiogram.fragments.ViewModel.SearchViewModel
 
@@ -32,6 +36,8 @@ class SearchFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         binding.searchBtn.setOnClickListener {
+            hideKeyboard(it)
+
             val usernameIsEntered = binding.searchField.text.toString() != ""
             if (usernameIsEntered) {
                 val username = binding.searchField.text.toString()
@@ -40,13 +46,18 @@ class SearchFragment : Fragment() {
                 searchViewModel.searchResponse.observe(this, {
                     if (it.success) {
                         Log.i("SearchResponse", "success true")
-                        val users = it.users
-                        for (user in users!!) {
-                            Log.i("SearchResponse", "username: ${user.username}")
-                            Log.i("SearchResponse", "first name: ${user.firstName}")
-                            Log.i("SearchResponse", "last name: ${user.lastName}")
-                            Log.i("SearchResponse", "-----")
+                        val users = it.users!!
+                        val recyclerView = binding.searchRecyclerView
+                        if (users.isNotEmpty()) {
+                            binding.noUserFound.visibility = View.INVISIBLE
+
+                            recyclerView.adapter = SearchAdapter(users)
                         }
+                        else {
+                            binding.noUserFound.visibility = View.VISIBLE
+                            recyclerView.adapter = SearchAdapter(listOf())
+                        }
+
                     } else {
                         Log.i("SearchResponse", "success false")
                         Log.i("SearchResponse", it.message.toString())
@@ -54,5 +65,11 @@ class SearchFragment : Fragment() {
                 })
             }
         }
+    }
+
+    private fun hideKeyboard(view: View) {
+        val inputMethodManager =
+            requireActivity().getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 }
