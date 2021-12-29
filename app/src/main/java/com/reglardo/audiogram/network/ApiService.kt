@@ -82,6 +82,20 @@ interface UserApiService {
         @Part("token") token: String,
         @Part image: MultipartBody.Part,
     ): GeneralResponse
+
+    @POST("user/follow/")
+    @FormUrlEncoded
+    suspend fun followUser(
+        @Field("token") token: String,
+        @Field("username") username: String,
+    ): GeneralResponse
+
+    @POST("user/unfollow/")
+    @FormUrlEncoded
+    suspend fun unfollowUser(
+        @Field("token") token: String,
+        @Field("username") username: String,
+    ): GeneralResponse
 }
 
 object UserApi{

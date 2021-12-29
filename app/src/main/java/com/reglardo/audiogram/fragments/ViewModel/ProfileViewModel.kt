@@ -1,6 +1,7 @@
 package com.reglardo.audiogram.fragments.ViewModel
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,6 +16,8 @@ class ProfileViewModel: ViewModel() {
 
     var profileResponse: MutableLiveData<InfoResponse> = MutableLiveData()
     var profileUpdateResponse: MutableLiveData<GeneralResponse> = MutableLiveData()
+    var followResponse: MutableLiveData<GeneralResponse> = MutableLiveData()
+    var unfollowResponse: MutableLiveData<GeneralResponse> = MutableLiveData()
 
     fun getProfile(username: String) {
         viewModelScope.launch {
@@ -27,6 +30,22 @@ class ProfileViewModel: ViewModel() {
         viewModelScope.launch {
             val response = UserApi.retrofitService.getMyInfo(MainActivity.token)
             profileResponse.value = response
+        }
+    }
+
+    fun followUser(username: String) {
+        viewModelScope.launch {
+            Log.i("Follow", "followUser")
+            val response = UserApi.retrofitService.followUser(MainActivity.token, username)
+            followResponse.value = response
+        }
+    }
+
+    fun unfollowUser(username: String) {
+        viewModelScope.launch {
+            Log.i("Follow", "unfollowUser")
+            val response = UserApi.retrofitService.unfollowUser(MainActivity.token, username)
+            unfollowResponse.value = response
         }
     }
 

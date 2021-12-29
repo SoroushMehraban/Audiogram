@@ -148,3 +148,56 @@ def upload_profile_image(request):
         })
 
 
+def follow(request):
+    if request.method == "POST":
+        try:
+            token = request.POST.get("token")
+            request_user = User.objects.get(token=token)
+        except Exception:
+            return JsonResponse({"success": False, "message": "User is not authenticated"})
+
+        username = request.POST.get("username")
+        if username is None:
+            return JsonResponse({"success": False, "message": "Username is None"})
+
+        try:
+            user = User.objects.get(username=username)
+        except Exception:
+            return JsonResponse({"success": False, "message": "User does not exist"})
+
+        if user.username == request_user.username:
+            return JsonResponse({"success": False, "message": "You can't follow yourself"})
+
+        if Follow.objects.filter(follower=request_user, following=user).count() == 0:
+            Follow(follower=request_user, following=user).save()
+            return JsonResponse({"success": True, "message": "Followed successfully"})
+        else:
+            return JsonResponse({"success": False, "message": "User is already followed"})
+
+
+def unfollow(request):
+    if request.method == "POST":
+        try:
+            token = request.POST.get("token")
+            request_user = User.objects.get(token=token)
+        except Exception:
+            return JsonResponse({"success": False, "message": "User is not authenticated"})
+
+        username = request.POST.get("username")
+        if username is None:
+            return JsonResponse({"success": False, "message": "Username is None"})
+
+        try:
+            user = User.objects.get(username=username)
+        except Exception:
+            return JsonResponse({"success": False, "message": "User does not exist"})
+
+        if user.username == request_user.username:
+            return JsonResponse({"success": False, "message": "You can't unfollow yourself"})
+
+        if Follow.objects.filter(follower=request_user, following=user).count() == 1:
+            Follow.objects.filter(follower=request_user, following=user).delete()
+            return JsonResponse({"success": True, "message": "Unfollowed successfully"})
+        else:
+            return JsonResponse({"success": False, "message": "User is already unfollowed"})
+

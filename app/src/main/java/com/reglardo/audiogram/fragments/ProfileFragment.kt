@@ -117,7 +117,37 @@ class ProfileFragment : Fragment() {
                     binding.logoutBtn.visibility = View.VISIBLE
                 }
                 else {
-                    binding.profileBtn.text = getString(R.string.follow)
+                    if (it.isFollowed == true) {
+                        binding.profileBtn.text = getString(R.string.followed)
+
+                    }
+                    else {
+                        binding.profileBtn.text = getString(R.string.follow)
+                    }
+
+                    binding.profileBtn.setOnClickListener {
+                        Log.i("Follow", "Clicked!: ${binding.profileBtn.text}")
+                        when(binding.profileBtn.text) {
+                            getString(R.string.follow) -> profileViewModel.followUser(username!!)
+                            getString(R.string.followed) -> profileViewModel.unfollowUser(username!!)
+                        }
+                    }
+
+                    profileViewModel.followResponse.observe(viewLifecycleOwner, {
+                        Log.i("Follow", "FollowResponse: ${it.success}")
+                        Log.i("Follow", "FollowResponse: ${it.message}")
+                        if (it.success) {
+                            binding.profileBtn.text = getString(R.string.followed)
+                        }
+                    })
+
+                    profileViewModel.unfollowResponse.observe(viewLifecycleOwner, {
+                        Log.i("Follow", "unFollowResponse: ${it.success}")
+                        Log.i("Follow", "unFollowResponse: ${it.message}")
+                        if (it.success) {
+                            binding.profileBtn.text = getString(R.string.follow)
+                        }
+                    })
                 }
             }
         })
