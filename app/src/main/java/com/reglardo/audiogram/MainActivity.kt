@@ -46,6 +46,16 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    override fun onBackPressed() {
+        val profileSearchFragment = supportFragmentManager.findFragmentByTag("ProfileSearch")
+        if (profileSearchFragment != null && profileSearchFragment.isVisible) {
+            replaceFragment(searchFragment)
+        }
+        else {
+            super.onBackPressed()
+        }
+    }
+
     private fun replaceFragment(fragment: Fragment) {
         if (fragment != null) {
             val transaction = supportFragmentManager.beginTransaction()

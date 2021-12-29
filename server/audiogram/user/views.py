@@ -141,6 +141,7 @@ def upload_profile_image(request):
         image_file = request.FILES.get('file')
         request_user.image = image_file
         request_user.save()
+        print("OK")
         return JsonResponse({
             "success": True,
             "message": "Profile image is updated."

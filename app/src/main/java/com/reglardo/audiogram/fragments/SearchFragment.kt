@@ -45,22 +45,21 @@ class SearchFragment : Fragment() {
 
                 searchViewModel.searchResponse.observe(this, {
                     if (it.success) {
-                        Log.i("SearchResponse", "success true")
                         val users = it.users!!
                         val recyclerView = binding.searchRecyclerView
                         if (users.isNotEmpty()) {
                             binding.noUserFound.visibility = View.INVISIBLE
 
-                            recyclerView.adapter = SearchAdapter(users)
+                            recyclerView.adapter = SearchAdapter(this, users)
                         }
                         else {
                             binding.noUserFound.visibility = View.VISIBLE
-                            recyclerView.adapter = SearchAdapter(listOf())
+                            recyclerView.adapter = SearchAdapter(this, listOf())
                         }
 
                     } else {
-                        Log.i("SearchResponse", "success false")
-                        Log.i("SearchResponse", it.message.toString())
+                        Log.i("Error", "success false")
+                        Log.i("Error", it.message.toString())
                     }
                 })
             }

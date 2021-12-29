@@ -35,8 +35,7 @@ import java.io.File
 import okhttp3.RequestBody
 
 
-
-
+private const val ARG_PARAM1 = "param1"
 
 class ProfileFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by viewModels()
@@ -44,25 +43,111 @@ class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
 
-    private val imagePickLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data: Intent? = result.data
-            if (data != null && data.data != null) {
-                val imageFile = getBitmapFile(data)
-                val fileBody = MultipartBody.Part.createFormData("file", imageFile.name,
-                RequestBody.create(MediaType.parse("image/*"), imageFile))
+    private var username: String? = null
 
-                profileViewModel.uploadProfilePhoto(fileBody)
-                profileViewModel.profileUpdateResponse.observe(this, {
-                    if (it.success) {
-                        profileViewModel.getMyProfile()
-                    }
-                    else {
-                        Log.i("ProfileImage", it.message)
-                    }
-                })
+    companion object {
+        @JvmStatic
+        fun newInstance(username: String) =
+            ProfileFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_PARAM1, username)
+                }
+            }
+    }
+
+    private val imagePickLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                if (data != null && data.data != null) {
+                    val imageFile = getBitmapFile(data)
+                    val fileBody = MultipartBody.Part.createFormData(
+                        "file", imageFile.name,
+                        RequestBody.create(MediaType.parse("image/*"), imageFile)
+                    )
+
+                    profileViewModel.uploadProfilePhoto(fileBody)
+                    profileViewModel.profileUpdateResponse.observe(this, {
+                        if (it.success) {
+                            profileViewModel.getMyProfile()
+                        } else {
+                            Log.i("Error", it.message)
+                        }
+                    })
+                }
             }
         }
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            username = it.getString(ARG_PARAM1)
+        }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        _binding = FragmentProfileBinding.inflate(inflater, container, false)
+
+
+        if (username != null) {
+            profileViewModel.getProfile(username!!)
+        } else {
+            profileViewModel.getMyProfile()
+        }
+        profileViewModel.profileResponse.observe(viewLifecycleOwner, {
+            if (it.success) {
+                binding.username.text = it.username
+                binding.name.text = "(${it.firstName} ${it.lastName})"
+                binding.followersNumber.text = it.followers.toString()
+                binding.followingNumber.text = it.followings.toString()
+                binding.voicesNumber.text = it.voices.toString()
+                val imgUri = "${URL.BASE_URL}${it.image}".toUri().buildUpon().scheme("http").build()
+                binding.profileImage.load(imgUri)
+
+                if (it.isMe == true) {
+                    binding.profileBtn.text = getString(R.string.change_profile)
+                    binding.profileBtn.setOnClickListener {
+                        openGalleryForImage()
+                    }
+                    binding.logoutBtn.visibility = View.VISIBLE
+                }
+                else {
+                    binding.profileBtn.text = getString(R.string.follow)
+                }
+            }
+        })
+
+        binding.logoutBtn.setOnClickListener {
+            val contextWrapper = ContextWrapper(requireActivity().applicationContext)
+            val documentDirectory =
+                contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+            val tokenFile = File(documentDirectory, "token.gram")
+            tokenFile.delete()
+            openLoginActivity()
+        }
+
+        return binding.root
+    }
+
+
+    private fun openGalleryForImage() {
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+        imagePickLauncher.launch(intent)
+    }
+
+    private fun openLoginActivity() {
+        val intent = Intent(requireContext(), LoginActivity::class.java)
+        // We set the following flags to disable coming back from MainActivity to here
+        intent.flags =
+            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+        startActivity(intent)
     }
 
     private fun getBitmapFile(data: Intent): File {
@@ -81,58 +166,4 @@ class ProfileFragment : Fragment() {
         return File(selectedImagePath)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        _binding = FragmentProfileBinding.inflate(inflater, container, false)
-
-        profileViewModel.getMyProfile()
-        profileViewModel.profileResponse.observe(viewLifecycleOwner, {
-            if (it.success) {
-                binding.username.text = it.username
-                binding.name.text = "(${it.firstName} ${it.lastName})"
-                binding.followersNumber.text = it.followers.toString()
-                binding.followingNumber.text = it.followings.toString()
-                binding.voicesNumber.text = it.voices.toString()
-                val imgUri = "${URL.BASE_URL}${it.image}".toUri().buildUpon().scheme("http").build()
-                binding.profileImage.load(imgUri)
-
-                binding.profileBtn.text = getString(R.string.change_profile)
-                binding.profileBtn.setOnClickListener {
-                    openGalleryForImage()
-                }
-            }
-        })
-
-        binding.logoutBtn.setOnClickListener {
-            val contextWrapper = ContextWrapper(requireActivity().applicationContext)
-            val documentDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
-            val tokenFile = File(documentDirectory, "token.gram")
-            tokenFile.delete()
-            openLoginActivity()
-        }
-
-        return binding.root
-    }
-
-    private fun openGalleryForImage() {
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        imagePickLauncher.launch(intent)
-    }
-
-    private fun openLoginActivity() {
-        val intent = Intent(requireContext(), LoginActivity::class.java)
-        // We set the following flags to disable coming back from MainActivity to here
-        intent.flags =
-            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-
-        startActivity(intent)
-    }
 }
