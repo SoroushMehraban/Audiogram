@@ -2,11 +2,13 @@ package com.reglardo.audiogram.fragments
 
 import android.app.Activity
 import android.content.ContentResolver
+import android.content.ContextWrapper
 import android.content.Intent
 import android.database.Cursor
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -22,7 +24,9 @@ import androidx.lifecycle.MutableLiveData
 import coil.load
 import com.example.android.marsphotos.network.URL
 import com.example.android.marsphotos.network.UserApi
+import com.reglardo.audiogram.MainActivity
 import com.reglardo.audiogram.R
+import com.reglardo.audiogram.authentication.LoginActivity
 import com.reglardo.audiogram.databinding.FragmentProfileBinding
 import com.reglardo.audiogram.fragments.ViewModel.ProfileViewModel
 import okhttp3.MediaType
@@ -89,7 +93,7 @@ class ProfileFragment : Fragment() {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
 
         profileViewModel.getMyProfile()
-        profileViewModel.profileResponse.observe(this, {
+        profileViewModel.profileResponse.observe(viewLifecycleOwner, {
             if (it.success) {
                 binding.username.text = it.username
                 binding.name.text = "(${it.firstName} ${it.lastName})"
@@ -106,16 +110,29 @@ class ProfileFragment : Fragment() {
             }
         })
 
-        return binding.root
-    }
+        binding.logoutBtn.setOnClickListener {
+            val contextWrapper = ContextWrapper(requireActivity().applicationContext)
+            val documentDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+            val tokenFile = File(documentDirectory, "token.gram")
+            tokenFile.delete()
+            openLoginActivity()
+        }
 
-    override fun onResume() {
-        super.onResume()
+        return binding.root
     }
 
     private fun openGalleryForImage() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         imagePickLauncher.launch(intent)
+    }
+
+    private fun openLoginActivity() {
+        val intent = Intent(requireContext(), LoginActivity::class.java)
+        // We set the following flags to disable coming back from MainActivity to here
+        intent.flags =
+            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+        startActivity(intent)
     }
 }

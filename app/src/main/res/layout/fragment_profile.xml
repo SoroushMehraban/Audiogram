@@ -48,6 +48,28 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Button"
         android:layout_marginStart="18dp"/>
 
+    <LinearLayout
+        android:id="@+id/logout_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/profile_btn"
+        app:layout_constraintBottom_toBottomOf="@id/profile_btn"
+        android:layout_marginEnd="18dp"
+        >
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_exit"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/logout"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+            />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/voices_number"
         android:layout_width="wrap_content"
