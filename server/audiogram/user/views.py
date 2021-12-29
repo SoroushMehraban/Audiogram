@@ -91,6 +91,7 @@ def get_info(request):
             "username": user.username,
             "firstName": user.first_name,
             "lastName": user.last_name,
+            "image": user.image.url,
             "followers": Follow.objects.filter(following=user).count(),
             "followings": Follow.objects.filter(follower=user).count(),
             'voices': Voice.objects.filter(owner=user).count()

@@ -7,9 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.viewModels
+import androidx.core.net.toUri
 import androidx.fragment.app.viewModels
-import com.reglardo.audiogram.MainActivity
-import com.reglardo.audiogram.authentication.AuthenticationViewModel
+import coil.load
+import com.example.android.marsphotos.network.URL
 import com.reglardo.audiogram.databinding.FragmentProfileBinding
 import com.reglardo.audiogram.fragments.ViewModel.ProfileViewModel
 
@@ -43,6 +44,9 @@ class ProfileFragment : Fragment() {
                 binding.followersNumber.text = it.followers.toString()
                 binding.followingNumber.text = it.followings.toString()
                 binding.voicesNumber.text = it.voices.toString()
+
+                val imgUri = "${URL.BASE_URL}${it.image}".toUri().buildUpon().scheme("http").build()
+                binding.profileImage.load(imgUri)
             }
         })
     }

@@ -1,5 +1,6 @@
 package com.example.android.marsphotos.network
 
+import com.example.android.marsphotos.network.URL.BASE_URL
 import com.reglardo.audiogram.network.AuthenticationResponse
 import com.reglardo.audiogram.network.InfoResponse
 import com.reglardo.audiogram.network.SearchResponse
@@ -9,8 +10,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
 
-private const val BASE_URL =
-    "http://10.0.2.2/"
+object URL {
+    const val BASE_URL =
+        "http://10.0.2.2"
+}
 
 private val moshi = Moshi.Builder()
     .add(KotlinJsonAdapterFactory())

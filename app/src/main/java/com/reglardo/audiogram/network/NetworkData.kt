@@ -13,6 +13,7 @@ data class InfoResponse (
     val username: String?,
     val firstName: String?,
     val lastName: String?,
+    val image: String?,
     val followers: Int?,
     val followings: Int?,
     val voices: Int?,
