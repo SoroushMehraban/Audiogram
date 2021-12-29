@@ -1,6 +1,5 @@
 package com.reglardo.audiogram.fragments.ViewModel
 
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,10 +11,11 @@ import com.reglardo.audiogram.network.InfoResponse
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 
-class ProfileViewModel: ViewModel() {
+class ProfileViewModel : ViewModel() {
 
     var profileResponse: MutableLiveData<InfoResponse> = MutableLiveData()
-    var profileUpdateResponse: MutableLiveData<GeneralResponse> = MutableLiveData()
+    var profileUpdateResponse: MutableLiveData<InfoResponse> = MutableLiveData()
+    var profileImageUpdateResponse: MutableLiveData<GeneralResponse> = MutableLiveData()
     var followResponse: MutableLiveData<GeneralResponse> = MutableLiveData()
     var unfollowResponse: MutableLiveData<GeneralResponse> = MutableLiveData()
 
@@ -33,9 +33,19 @@ class ProfileViewModel: ViewModel() {
         }
     }
 
+    fun updateProfile(username: String?) {
+        viewModelScope.launch {
+            val response = if (username != null) {
+                UserApi.retrofitService.getInfo(MainActivity.token, username)
+            } else {
+                UserApi.retrofitService.getMyInfo(MainActivity.token)
+            }
+            profileUpdateResponse.value = response
+        }
+    }
+
     fun followUser(username: String) {
         viewModelScope.launch {
-            Log.i("Follow", "followUser")
             val response = UserApi.retrofitService.followUser(MainActivity.token, username)
             followResponse.value = response
         }
@@ -43,7 +53,6 @@ class ProfileViewModel: ViewModel() {
 
     fun unfollowUser(username: String) {
         viewModelScope.launch {
-            Log.i("Follow", "unfollowUser")
             val response = UserApi.retrofitService.unfollowUser(MainActivity.token, username)
             unfollowResponse.value = response
         }
@@ -52,7 +61,7 @@ class ProfileViewModel: ViewModel() {
     fun uploadProfilePhoto(image: MultipartBody.Part) {
         viewModelScope.launch {
             val response = UserApi.retrofitService.uploadImage(MainActivity.token, image)
-            profileUpdateResponse.value = response
+            profileImageUpdateResponse.value = response
         }
     }
 }

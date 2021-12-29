@@ -88,6 +88,7 @@ def get_info(request):
             except Exception:
                 return JsonResponse({"success": False, "message": "User not exists"})
 
+        print("BOOM")
         return JsonResponse({
             "success": True,
             "username": user.username,

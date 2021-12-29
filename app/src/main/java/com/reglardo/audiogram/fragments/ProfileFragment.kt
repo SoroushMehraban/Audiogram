@@ -1,11 +1,9 @@
 package com.reglardo.audiogram.fragments
 
 import android.app.Activity
-import android.content.ContentResolver
 import android.content.ContextWrapper
 import android.content.Intent
 import android.database.Cursor
-import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -16,11 +14,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.core.net.toUri
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.lifecycleScope
 import coil.load
 import com.example.android.marsphotos.network.URL
 import com.example.android.marsphotos.network.UserApi
@@ -29,10 +25,12 @@ import com.reglardo.audiogram.R
 import com.reglardo.audiogram.authentication.LoginActivity
 import com.reglardo.audiogram.databinding.FragmentProfileBinding
 import com.reglardo.audiogram.fragments.ViewModel.ProfileViewModel
+import kotlinx.coroutines.launch
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import java.io.File
 import okhttp3.RequestBody
+import kotlin.math.log
 
 
 private const val ARG_PARAM1 = "param1"
@@ -67,7 +65,7 @@ class ProfileFragment : Fragment() {
                     )
 
                     profileViewModel.uploadProfilePhoto(fileBody)
-                    profileViewModel.profileUpdateResponse.observe(this, {
+                    profileViewModel.profileImageUpdateResponse.observe(this, {
                         if (it.success) {
                             profileViewModel.getMyProfile()
                         } else {
@@ -86,6 +84,7 @@ class ProfileFragment : Fragment() {
         }
     }
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -99,6 +98,7 @@ class ProfileFragment : Fragment() {
         } else {
             profileViewModel.getMyProfile()
         }
+
         profileViewModel.profileResponse.observe(viewLifecycleOwner, {
             if (it.success) {
                 binding.username.text = it.username
@@ -134,21 +134,27 @@ class ProfileFragment : Fragment() {
                     }
 
                     profileViewModel.followResponse.observe(viewLifecycleOwner, {
-                        Log.i("Follow", "FollowResponse: ${it.success}")
-                        Log.i("Follow", "FollowResponse: ${it.message}")
                         if (it.success) {
                             binding.profileBtn.text = getString(R.string.followed)
+                            profileViewModel.updateProfile(username)
                         }
                     })
 
                     profileViewModel.unfollowResponse.observe(viewLifecycleOwner, {
-                        Log.i("Follow", "unFollowResponse: ${it.success}")
-                        Log.i("Follow", "unFollowResponse: ${it.message}")
                         if (it.success) {
                             binding.profileBtn.text = getString(R.string.follow)
+                            profileViewModel.updateProfile(username)
                         }
                     })
                 }
+            }
+        })
+
+        profileViewModel.profileUpdateResponse.observe(viewLifecycleOwner, {
+            if (it.success) {
+                binding.voicesNumber.text = it.voices.toString()
+                binding.followersNumber.text = it.followers.toString()
+                binding.followingNumber.text = it.followings.toString()
             }
         })
 
@@ -162,6 +168,17 @@ class ProfileFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        lifecycleScope.launch {
+            val response = UserApi.retrofitService.getMyInfo(MainActivity.token)
+            binding.voicesNumber.text = response.voices.toString()
+            binding.followersNumber.text = response.followers.toString()
+            binding.followingNumber.text = response.followings.toString()
+        }
     }
 
 
