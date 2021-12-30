@@ -125,6 +125,13 @@ interface VoiceApiService {
     suspend fun getHomeVoices(
         @Field("token") token: String,
     ): VoiceResponse
+
+    @POST("voice/like/")
+    @FormUrlEncoded
+    suspend fun like(
+        @Field("token") token: String,
+        @Field("voiceId") voiceId: String,
+    ): VoiceResponse
 }
 
 object VoiceApi{

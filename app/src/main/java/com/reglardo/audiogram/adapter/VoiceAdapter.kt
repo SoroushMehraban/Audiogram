@@ -6,14 +6,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.android.marsphotos.network.URL
+import com.example.android.marsphotos.network.VoiceApi
+import com.reglardo.audiogram.MainActivity
 import com.reglardo.audiogram.R
 import com.reglardo.audiogram.fragments.ViewModel.VoiceViewModel
 import com.reglardo.audiogram.network.UserVoiceResponse
 import com.reglardo.audiogram.network.VoiceResponse
+import kotlinx.coroutines.*
 
 
 class VoiceAdapter(
@@ -29,10 +34,9 @@ class VoiceAdapter(
         val voiceSeekbar: SeekBar = view.findViewById(R.id.voice_seekbar)
         val playPauseBtn: ImageButton = view.findViewById(R.id.play_pause_btn)
 
-        val commentLayout: LinearLayout = view.findViewById(R.id.comment_layout)
+        val commentImg: ImageView = view.findViewById(R.id.comment_img)
         val commentNumber: TextView = view.findViewById(R.id.comment_number)
 
-        val likeLayout: LinearLayout = view.findViewById(R.id.like_layout)
         val likeImg: ImageView = view.findViewById(R.id.like_img)
         val likeNumber: TextView = view.findViewById(R.id.like_number)
     }
@@ -54,6 +58,36 @@ class VoiceAdapter(
         holder.publishDate.text = voiceResponse.publishDate
         holder.likeNumber.text = voiceResponse.likeNumbers.toString()
         holder.commentNumber.text = voiceResponse.commentNumbers.toString()
+
+        var isLiked = false
+        if (voiceResponse.isLiked) {
+            holder.likeImg.setImageResource(R.drawable.heart_active)
+            isLiked = true
+        }
+
+        holder.likeImg.setOnClickListener {
+            GlobalScope.launch {
+                val response = VoiceApi.retrofitService.like(MainActivity.token, voiceResponse.id)
+                response.let {
+                    if (it.success) {
+                        withContext(Dispatchers.Main) {
+                            if (isLiked) {
+                                isLiked = false
+                                holder.likeImg.setImageResource(R.drawable.heart)
+                            }
+                            else {
+                                isLiked = true
+                                holder.likeImg.setImageResource(R.drawable.heart_active)
+                            }
+                            holder.likeNumber.text = it.message
+                        }
+                    }
+                }
+            }
+//            voiceViewModel.like(voiceResponse.id)
+        }
+
+
 
         var isPlaying = false
         val mediaPlayer =  MediaPlayer.create(holder.view.context,

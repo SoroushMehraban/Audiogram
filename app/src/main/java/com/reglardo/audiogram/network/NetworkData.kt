@@ -28,12 +28,14 @@ data class VoiceResponse(
 )
 
 data class UserVoiceResponse(
+    val id: String,
     val username: String,
     val imageUrl: String,
     val voiceUrl: String,
     val publishDate: String,
     val likeNumbers: Int,
-    val commentNumbers: Int
+    val commentNumbers: Int,
+    val isLiked: Boolean
 )
 
 data class SearchResponse (

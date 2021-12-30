@@ -42,12 +42,14 @@ def get_profile_voices(request):
         voices_result = []
         for voice in voices:
             voices_result.append({
+                "id": voice.id,
                 "username": user.username,
                 "imageUrl": user.image.url,
                 "voiceUrl": voice.voice.url,
                 "publishDate": naturaltime(voice.publish_date),
                 "likeNumbers": Like.objects.filter(voice=voice).count(),
-                "commentNumbers": Comment.objects.filter(voice=voice).count()
+                "commentNumbers": Comment.objects.filter(voice=voice).count(),
+                "isLiked": Like.objects.filter(voice=voice, user=request_user).count() == 1
             })
 
         return JsonResponse({"success": True, "voices": voices_result})
@@ -71,12 +73,39 @@ def get_home_voices(request):
         voices_result = []
         for voice in voices:
             voices_result.append({
+                "id": voice.id,
                 "username": voice.owner.username,
                 "imageUrl": voice.owner.image.url,
                 "voiceUrl": voice.voice.url,
                 "publishDate": naturaltime(voice.publish_date),
                 "likeNumbers": Like.objects.filter(voice=voice).count(),
-                "commentNumbers": Comment.objects.filter(voice=voice).count()
+                "commentNumbers": Comment.objects.filter(voice=voice).count(),
+                "isLiked": Like.objects.filter(voice=voice, user=request_user).count() == 1
             })
 
         return JsonResponse({"success": True, "voices": voices_result})
+
+
+def like(request):
+    if request.method == "POST":
+        try:
+            token = request.POST.get("token")
+            request_user = User.objects.get(token=token)
+        except Exception:
+            return JsonResponse({"success": False, "message": "User is not authenticated"})
+
+        voice_id = request.POST.get('voiceId')
+        if voice_id is None:
+            return JsonResponse({"success": False, "message": "Voice ID is None"})
+
+        try:
+            voice = Voice.objects.get(id=voice_id)
+        except Exception:
+            return JsonResponse({"success": False, "message": "Voice not exist"})
+
+        if Like.objects.filter(voice=voice, user=request_user).count() == 1:
+            Like.objects.filter(voice=voice, user=request_user).delete()
+        else:
+            Like(voice=voice, user=request_user).save()
+
+        return JsonResponse({"success": True, "message": Like.objects.filter(voice=voice).count()})

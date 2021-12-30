@@ -1,10 +1,5 @@
-import os
-
-from PIL import Image, ImageOps
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
-from audiogram import settings
 
 
 class User(AbstractUser):

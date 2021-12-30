@@ -135,7 +135,6 @@ class ProfileFragment : Fragment() {
                     }
 
                     binding.profileBtn.setOnClickListener {
-                        Log.i("Follow", "Clicked!: ${binding.profileBtn.text}")
                         when(binding.profileBtn.text) {
                             getString(R.string.follow) -> profileViewModel.followUser(username!!)
                             getString(R.string.followed) -> profileViewModel.unfollowUser(username!!)
@@ -260,7 +259,6 @@ class ProfileFragment : Fragment() {
             profileViewModel.uploadVoice(fileBody)
             profileViewModel.voiceUploadResponse.observe(this, {
                 if (it.success) {
-                    Log.i("UploadVoice", "Success!")
                     updateStats()
                 }
             })

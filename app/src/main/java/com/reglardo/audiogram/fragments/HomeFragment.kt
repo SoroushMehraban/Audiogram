@@ -39,6 +39,7 @@ class HomeFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
+        val fragment = this
         lifecycleScope.launch {
             val response = VoiceApi.retrofitService.getHomeVoices(MainActivity.token)
             response.let {

@@ -24,4 +24,10 @@ class VoiceViewModel: ViewModel() {
             voiceResponse.value = response
         }
     }
+
+    fun like(voiceId: String) {
+        viewModelScope.launch {
+            val response = VoiceApi.retrofitService.like(MainActivity.token, voiceId)
+        }
+    }
 }
