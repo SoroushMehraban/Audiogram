@@ -32,10 +32,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val intentFrom = intent?.extras?.getString(RecordingListActivity.FROM).toString()
-        if (intentFrom == "UploadPhoto")
+        if (intentFrom == "UploadPhoto") {
             replaceFragment(profileFragment)
-        else
+            binding.navigationBar.selectedItemId = R.id.icon_profile
+        }
+        else {
             replaceFragment(recorderFragment)
+            binding.navigationBar.selectedItemId = R.id.icon_recorder
+        }
 
         binding.navigationBar.selectedItemId = R.id.icon_recorder
         binding.navigationBar.setOnItemSelectedListener {
