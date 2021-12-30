@@ -16,11 +16,6 @@
         android:title="@string/recorder"/>
 
     <item
-        android:id="@+id/icon_notification"
-        android:icon="@drawable/ic_notification"
-        android:title="@string/notification"/>
-
-    <item
         android:id="@+id/icon_profile"
         android:icon="@drawable/ic_social"
         android:title="@string/profile"/>

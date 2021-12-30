@@ -15,7 +15,6 @@ class MainActivity : AppCompatActivity() {
     private val homeFragment = HomeFragment()
     private val searchFragment = SearchFragment()
     private val recorderFragment = RecorderFragment()
-    private val notificationFragment = NotificationFragment()
     private val profileFragment = ProfileFragment()
 
     private lateinit var binding: ActivityMainBinding
@@ -47,7 +46,6 @@ class MainActivity : AppCompatActivity() {
                 R.id.icon_home -> replaceFragment(homeFragment)
                 R.id.icon_search -> replaceFragment(searchFragment)
                 R.id.icon_recorder -> replaceFragment(recorderFragment)
-                R.id.icon_notification -> replaceFragment(notificationFragment)
                 R.id.icon_profile -> replaceFragment(profileFragment)
             }
             true
