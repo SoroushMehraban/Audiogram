@@ -72,7 +72,7 @@ class VoiceAdapter(
                 holder.playPauseBtn.setImageResource(R.drawable.ic_pause)
 
                 mediaPlayer.setOnCompletionListener {
-                    voiceViewModel.changeIsPlayingState(false)
+                    isPlaying = false
                     holder.playPauseBtn.setImageResource(R.drawable.ic_play)
                     holder.voiceSeekbar.isEnabled = false
                     holder.voiceSeekbar.progress = 0

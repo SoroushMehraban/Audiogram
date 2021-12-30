@@ -72,6 +72,7 @@ class ProfileFragment : Fragment() {
                     profileViewModel.profileImageUpdateResponse.observe(this, {
                         if (it.success) {
                             profileViewModel.getMyProfile()
+                            updateVoices()
                         } else {
                             Log.i("Error", it.message)
                         }

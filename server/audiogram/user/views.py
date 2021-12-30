@@ -10,6 +10,7 @@ from django.core.validators import validate_email
 from django.http import JsonResponse, HttpResponse
 
 from audiogram.utils import check_missing_data
+from .utils import convert_image_to_png
 
 
 def login_view(request):
@@ -141,7 +142,8 @@ def upload_profile_image(request):
         image_file = request.FILES.get('file')
         request_user.image = image_file
         request_user.save()
-        print("OK")
+        convert_image_to_png(request_user)
+
         return JsonResponse({
             "success": True,
             "message": "Profile image is updated."
@@ -200,4 +202,3 @@ def unfollow(request):
             return JsonResponse({"success": True, "message": "Unfollowed successfully"})
         else:
             return JsonResponse({"success": False, "message": "User is already unfollowed"})
-
