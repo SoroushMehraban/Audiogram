@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.contrib.humanize.templatetags.humanize import naturaltime
-from user.models import User
+from user.models import User, Follow
 from voice.models import Voice, Like, Comment
 
 
@@ -44,6 +44,35 @@ def get_profile_voices(request):
             voices_result.append({
                 "username": user.username,
                 "imageUrl": user.image.url,
+                "voiceUrl": voice.voice.url,
+                "publishDate": naturaltime(voice.publish_date),
+                "likeNumbers": Like.objects.filter(voice=voice).count(),
+                "commentNumbers": Comment.objects.filter(voice=voice).count()
+            })
+
+        return JsonResponse({"success": True, "voices": voices_result})
+
+
+def get_home_voices(request):
+    if request.method == "POST":
+        try:
+            token = request.POST.get("token")
+            request_user = User.objects.get(token=token)
+        except Exception:
+            return JsonResponse({"success": False, "message": "User is not authenticated"})
+
+        followings = Follow.objects.filter(follower=request_user)
+        voices = Voice.objects.none()
+        for following in followings:
+            voices |= Voice.objects.filter(owner=following.following)
+
+        voices = voices.order_by('-publish_date')
+
+        voices_result = []
+        for voice in voices:
+            voices_result.append({
+                "username": voice.owner.username,
+                "imageUrl": voice.owner.image.url,
                 "voiceUrl": voice.voice.url,
                 "publishDate": naturaltime(voice.publish_date),
                 "likeNumbers": Like.objects.filter(voice=voice).count(),

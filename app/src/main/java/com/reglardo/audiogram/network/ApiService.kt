@@ -119,6 +119,12 @@ interface VoiceApiService {
         @Field("token") token: String,
         @Field("username") username: String?
     ): VoiceResponse
+
+    @POST("voice/get_home_voices/")
+    @FormUrlEncoded
+    suspend fun getHomeVoices(
+        @Field("token") token: String,
+    ): VoiceResponse
 }
 
 object VoiceApi{

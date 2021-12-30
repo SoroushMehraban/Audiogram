@@ -11,6 +11,9 @@ class Voice(models.Model):
     def __str__(self):
         return f"{self.owner}: {self.voice}"
 
+    class Meta:
+        ordering = ['-publish_date']
+
 
 class Like(models.Model):
     voice = models.ForeignKey(Voice, on_delete=models.CASCADE)

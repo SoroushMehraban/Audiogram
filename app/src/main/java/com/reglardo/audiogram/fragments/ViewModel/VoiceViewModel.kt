@@ -1,5 +1,6 @@
 package com.reglardo.audiogram.fragments.ViewModel
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,8 +24,5 @@ class VoiceViewModel: ViewModel() {
             val response = VoiceApi.retrofitService.getProfileVoices(MainActivity.token, null)
             voiceResponse.value = response
         }
-    }
-
-    fun getHomeVoices() {
     }
 }
