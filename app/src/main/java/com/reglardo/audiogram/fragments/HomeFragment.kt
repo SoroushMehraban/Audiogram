@@ -51,7 +51,7 @@ class HomeFragment : Fragment() {
                     else {
                         binding.noVoicePosted.visibility = View.VISIBLE
                     }
-                    recyclerView.adapter = VoiceAdapter(voices)
+                    recyclerView.adapter = VoiceAdapter(voiceViewModel, voices)
                 }
             }
         }
