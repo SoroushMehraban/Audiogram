@@ -332,8 +332,8 @@
         android:visibility="invisible"
         app:tint="@color/secondary_light" />
     <SeekBar
-        android:visibility="invisible"
         android:id="@+id/seekBar"
+        android:visibility="invisible"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
