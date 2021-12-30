@@ -38,6 +38,19 @@ data class UserVoiceResponse(
     val isLiked: Boolean
 )
 
+data class CommentResponse(
+    val success: Boolean,
+    val message: String?,
+    val comments: List<VoiceCommentResponse>?
+)
+
+data class VoiceCommentResponse(
+    val userImage: String,
+    val username: String,
+    val commentDate: String,
+    val content: String,
+)
+
 data class SearchResponse (
     val success: Boolean,
     val message: String?,

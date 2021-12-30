@@ -132,6 +132,21 @@ interface VoiceApiService {
         @Field("token") token: String,
         @Field("voiceId") voiceId: String,
     ): VoiceResponse
+
+    @POST("voice/comment/")
+    @FormUrlEncoded
+    suspend fun comment(
+        @Field("token") token: String,
+        @Field("voiceId") voiceId: String,
+        @Field("comment") comment: String,
+    ): VoiceResponse
+
+    @POST("voice/get_comments/")
+    @FormUrlEncoded
+    suspend fun getComments(
+        @Field("token") token: String,
+        @Field("voiceId") voiceId: String,
+    ): CommentResponse
 }
 
 object VoiceApi{

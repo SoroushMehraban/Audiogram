@@ -20,15 +20,14 @@ import androidx.lifecycle.lifecycleScope
 import coil.load
 import com.example.android.marsphotos.network.URL
 import com.example.android.marsphotos.network.UserApi
+import com.example.android.marsphotos.network.VoiceApi
 import com.reglardo.audiogram.MainActivity
 import com.reglardo.audiogram.R
 import com.reglardo.audiogram.RecordingListActivity
-import com.reglardo.audiogram.adapter.SearchAdapter
 import com.reglardo.audiogram.adapter.VoiceAdapter
 import com.reglardo.audiogram.authentication.LoginActivity
 import com.reglardo.audiogram.databinding.FragmentProfileBinding
 import com.reglardo.audiogram.fragments.ViewModel.ProfileViewModel
-import com.reglardo.audiogram.fragments.ViewModel.VoiceViewModel
 import kotlinx.coroutines.launch
 import okhttp3.MediaType
 import okhttp3.MultipartBody
@@ -40,7 +39,6 @@ private const val ARG_PARAM1 = "param1"
 
 class ProfileFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by viewModels()
-    private val voiceViewModel: VoiceViewModel by viewModels()
 
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
@@ -188,15 +186,19 @@ class ProfileFragment : Fragment() {
 
     private fun updateVoices() {
         if (username == null) {
-            voiceViewModel.getMyVoices()
+            getMyVoices()
 
         } else {
-            voiceViewModel.getProfileVoices(username!!)
+            getProfileVoices(username!!)
         }
+    }
 
-        voiceViewModel.voiceResponse.observe(this, {
-            if (it.success) {
-                val voices = it.voices!!
+    private fun getMyVoices() {
+        val currentFragment = this
+        lifecycleScope.launch {
+            val response = VoiceApi.retrofitService.getProfileVoices(MainActivity.token, null)
+            if (response.success) {
+                val voices = response.voices!!
                 val recyclerView = binding.profileVoiceRecyclerView
                 if (voices.isNotEmpty()) {
                     binding.noVoicePosted.visibility = View.GONE
@@ -204,9 +206,27 @@ class ProfileFragment : Fragment() {
                 else {
                     binding.noVoicePosted.visibility = View.VISIBLE
                 }
-                recyclerView.adapter = VoiceAdapter(voiceViewModel, voices)
+                recyclerView.adapter = VoiceAdapter(currentFragment, voices, "fromProfileFragment")
             }
-        })
+        }
+    }
+
+    private fun getProfileVoices(username: String) {
+        val currentFragment = this
+        lifecycleScope.launch {
+            val response = VoiceApi.retrofitService.getProfileVoices(MainActivity.token, username)
+            if (response.success) {
+                val voices = response.voices!!
+                val recyclerView = binding.profileVoiceRecyclerView
+                if (voices.isNotEmpty()) {
+                    binding.noVoicePosted.visibility = View.GONE
+                }
+                else {
+                    binding.noVoicePosted.visibility = View.VISIBLE
+                }
+                recyclerView.adapter = VoiceAdapter(currentFragment, voices, "fromSearchFragment")
+            }
+        }
     }
 
     private fun updateStats() {

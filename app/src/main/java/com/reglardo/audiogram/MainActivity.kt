@@ -57,7 +57,20 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         val profileSearchFragment = supportFragmentManager.findFragmentByTag("ProfileSearch")
+        val commentFromHomeFragment = supportFragmentManager.findFragmentByTag("fromHomeFragment")
+        val commentFromProfileFragment = supportFragmentManager.findFragmentByTag("fromProfileFragment")
+        val commentFromSearchFragment = supportFragmentManager.findFragmentByTag("fromSearchFragment")
+
         if (profileSearchFragment != null && profileSearchFragment.isVisible) {
+            replaceFragment(searchFragment)
+        }
+        else if (commentFromHomeFragment != null && commentFromHomeFragment.isVisible){
+            replaceFragment(homeFragment)
+        }
+        else if (commentFromProfileFragment != null && commentFromProfileFragment.isVisible){
+            replaceFragment(profileFragment)
+        }
+        else if (commentFromSearchFragment != null && commentFromSearchFragment.isVisible){
             replaceFragment(searchFragment)
         }
         else {

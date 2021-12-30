@@ -86,7 +86,7 @@ def get_home_voices(request):
         return JsonResponse({"success": True, "voices": voices_result})
 
 
-def like(request):
+def like_view(request):
     if request.method == "POST":
         try:
             token = request.POST.get("token")
@@ -109,3 +109,60 @@ def like(request):
             Like(voice=voice, user=request_user).save()
 
         return JsonResponse({"success": True, "message": Like.objects.filter(voice=voice).count()})
+
+
+def comment_view(request):
+    if request.method == "POST":
+        try:
+            token = request.POST.get("token")
+            request_user = User.objects.get(token=token)
+        except Exception:
+            return JsonResponse({"success": False, "message": "User is not authenticated"})
+
+        voice_id = request.POST.get('voiceId')
+        if voice_id is None:
+            return JsonResponse({"success": False, "message": "Voice ID is None"})
+
+        content = request.POST.get('comment')
+        if content is None:
+            return JsonResponse({"success": False, "message": "Content is None"})
+
+        try:
+            voice = Voice.objects.get(id=voice_id)
+        except Exception:
+            return JsonResponse({"success": False, "message": "Voice not exist"})
+
+        Comment(voice=voice, user=request_user, content=content).save()
+
+        return JsonResponse({"success": True, "message": "Comment inserted successfully"})
+
+
+def get_comments(request):
+    if request.method == "POST":
+        try:
+            token = request.POST.get("token")
+            User.objects.get(token=token)
+        except Exception:
+            return JsonResponse({"success": False, "message": "User is not authenticated"})
+
+        voice_id = request.POST.get('voiceId')
+        if voice_id is None:
+            return JsonResponse({"success": False, "message": "Voice ID is None"})
+
+        try:
+            voice = Voice.objects.get(id=voice_id)
+        except Exception:
+            return JsonResponse({"success": False, "message": "Voice not exist"})
+
+        comments = Comment.objects.filter(voice=voice)
+
+        comments_result = []
+        for comment in comments:
+            comments_result.append({
+                "userImage": comment.user.image.url,
+                "username": comment.user.username,
+                "commentDate": naturaltime(comment.comment_date),
+                'content': comment.content
+            })
+
+        return JsonResponse({"success": True, "comments": comments_result})

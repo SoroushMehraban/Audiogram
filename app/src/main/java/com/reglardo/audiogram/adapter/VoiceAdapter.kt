@@ -7,23 +7,21 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.android.marsphotos.network.URL
 import com.example.android.marsphotos.network.VoiceApi
 import com.reglardo.audiogram.MainActivity
 import com.reglardo.audiogram.R
-import com.reglardo.audiogram.fragments.ViewModel.VoiceViewModel
+import com.reglardo.audiogram.fragments.CommentFragment
 import com.reglardo.audiogram.network.UserVoiceResponse
-import com.reglardo.audiogram.network.VoiceResponse
 import kotlinx.coroutines.*
 
 
 class VoiceAdapter(
-    private val voiceViewModel: VoiceViewModel,
-    private val voiceResponse: List<UserVoiceResponse>
+    private val currentFragment: Fragment,
+    private val voiceResponse: List<UserVoiceResponse>,
+    private val fromFragment: String
 ) : RecyclerView.Adapter<VoiceAdapter.VoiceViewHolder>() {
 
     class VoiceViewHolder(val view: View): RecyclerView.ViewHolder(view) {
@@ -84,7 +82,10 @@ class VoiceAdapter(
                     }
                 }
             }
-//            voiceViewModel.like(voiceResponse.id)
+        }
+
+        holder.commentImg.setOnClickListener {
+            replaceFragment(CommentFragment.newInstance(voiceResponse.id))
         }
 
 
@@ -136,4 +137,10 @@ class VoiceAdapter(
     }
 
     override fun getItemCount() = voiceResponse.size
+
+    private fun replaceFragment(fragment: Fragment) {
+        val transaction = currentFragment.parentFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container, fragment, fromFragment)
+        transaction.commit()
+    }
 }
