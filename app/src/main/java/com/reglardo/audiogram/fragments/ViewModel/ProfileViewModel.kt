@@ -16,6 +16,7 @@ class ProfileViewModel : ViewModel() {
     var profileResponse: MutableLiveData<InfoResponse> = MutableLiveData()
     var profileUpdateResponse: MutableLiveData<InfoResponse> = MutableLiveData()
     var profileImageUpdateResponse: MutableLiveData<GeneralResponse> = MutableLiveData()
+    var voiceUploadResponse: MutableLiveData<GeneralResponse> = MutableLiveData()
     var followResponse: MutableLiveData<GeneralResponse> = MutableLiveData()
     var unfollowResponse: MutableLiveData<GeneralResponse> = MutableLiveData()
 
@@ -64,4 +65,13 @@ class ProfileViewModel : ViewModel() {
             profileImageUpdateResponse.value = response
         }
     }
+
+    fun uploadVoice(voice: MultipartBody.Part) {
+        viewModelScope.launch {
+            val response = UserApi.retrofitService.uploadVoice(MainActivity.token, voice)
+            voiceUploadResponse.value = response
+        }
+    }
+
+
 }

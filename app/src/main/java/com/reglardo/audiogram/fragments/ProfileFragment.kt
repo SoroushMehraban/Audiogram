@@ -22,6 +22,7 @@ import com.example.android.marsphotos.network.URL
 import com.example.android.marsphotos.network.UserApi
 import com.reglardo.audiogram.MainActivity
 import com.reglardo.audiogram.R
+import com.reglardo.audiogram.RecordingListActivity
 import com.reglardo.audiogram.authentication.LoginActivity
 import com.reglardo.audiogram.databinding.FragmentProfileBinding
 import com.reglardo.audiogram.fragments.ViewModel.ProfileViewModel
@@ -30,7 +31,6 @@ import okhttp3.MediaType
 import okhttp3.MultipartBody
 import java.io.File
 import okhttp3.RequestBody
-import kotlin.math.log
 
 
 private const val ARG_PARAM1 = "param1"
@@ -92,7 +92,6 @@ class ProfileFragment : Fragment() {
         // Inflate the layout for this fragment
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
 
-
         if (username != null) {
             profileViewModel.getProfile(username!!)
         } else {
@@ -114,7 +113,12 @@ class ProfileFragment : Fragment() {
                     binding.profileBtn.setOnClickListener {
                         openGalleryForImage()
                     }
+
                     binding.logoutBtn.visibility = View.VISIBLE
+                    binding.uploadVoice.visibility = View.VISIBLE
+                    binding.uploadVoice.setOnClickListener {
+                        openRecordingList()
+                    }
                 }
                 else {
                     if (it.isFollowed == true) {
@@ -173,6 +177,10 @@ class ProfileFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
+        updateStats()
+    }
+
+    private fun updateStats() {
         lifecycleScope.launch {
             val response = UserApi.retrofitService.getMyInfo(MainActivity.token)
             binding.voicesNumber.text = response.voices.toString()
@@ -181,11 +189,51 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        uploadAudioIntentIfExists()
+    }
+
 
     private fun openGalleryForImage() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         imagePickLauncher.launch(intent)
+    }
+
+    private fun uploadAudioIntentIfExists() {
+        val selectedFile = activity?.intent?.extras?.getString(RecorderFragment.FILE)
+
+        if (selectedFile != null) {
+            activity?.intent?.removeExtra(RecorderFragment.FILE)
+
+            val contextWrapper = ContextWrapper(activity)
+            val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+
+            val selectedPath = "$audioDirectory/$selectedFile"
+            val audioFile = File(selectedPath)
+            val fileBody = MultipartBody.Part.createFormData(
+                "file", audioFile.name,
+                RequestBody.create(MediaType.parse("audio/*"), audioFile)
+            )
+
+            profileViewModel.uploadVoice(fileBody)
+            profileViewModel.voiceUploadResponse.observe(this, {
+                if (it.success) {
+                    Log.i("UploadVoice", "Success!")
+                    updateStats()
+                }
+            })
+        }
+    }
+
+    private fun openRecordingList() {
+        activity?.let {
+            val intent = Intent(it, RecordingListActivity::class.java)
+            intent.putExtra(RecordingListActivity.FROM, "UploadPhoto")
+            startActivity(intent)
+        }
+
     }
 
     private fun openLoginActivity() {

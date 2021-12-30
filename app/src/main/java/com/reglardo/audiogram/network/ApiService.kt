@@ -83,6 +83,13 @@ interface UserApiService {
         @Part image: MultipartBody.Part,
     ): GeneralResponse
 
+    @POST("voice/upload/")
+    @Multipart
+    suspend fun uploadVoice(
+        @Part("token") token: String,
+        @Part voice: MultipartBody.Part,
+    ): GeneralResponse
+
     @POST("user/follow/")
     @FormUrlEncoded
     suspend fun followUser(
