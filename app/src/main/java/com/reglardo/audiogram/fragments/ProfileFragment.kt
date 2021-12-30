@@ -23,9 +23,12 @@ import com.example.android.marsphotos.network.UserApi
 import com.reglardo.audiogram.MainActivity
 import com.reglardo.audiogram.R
 import com.reglardo.audiogram.RecordingListActivity
+import com.reglardo.audiogram.adapter.SearchAdapter
+import com.reglardo.audiogram.adapter.VoiceAdapter
 import com.reglardo.audiogram.authentication.LoginActivity
 import com.reglardo.audiogram.databinding.FragmentProfileBinding
 import com.reglardo.audiogram.fragments.ViewModel.ProfileViewModel
+import com.reglardo.audiogram.fragments.ViewModel.VoiceViewModel
 import kotlinx.coroutines.launch
 import okhttp3.MediaType
 import okhttp3.MultipartBody
@@ -37,6 +40,7 @@ private const val ARG_PARAM1 = "param1"
 
 class ProfileFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by viewModels()
+    private val voiceViewModel: VoiceViewModel by viewModels()
 
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
@@ -178,14 +182,49 @@ class ProfileFragment : Fragment() {
         super.onStart()
 
         updateStats()
+
+        updateVoices()
+    }
+
+    private fun updateVoices() {
+        if (username == null) {
+            voiceViewModel.getMyVoices()
+
+        } else {
+            voiceViewModel.getProfileVoices(username!!)
+        }
+
+        voiceViewModel.voiceResponse.observe(this, {
+            if (it.success) {
+                val voices = it.voices!!
+                val recyclerView = binding.profileVoiceRecyclerView
+                if (voices.isNotEmpty()) {
+                    binding.noVoicePosted.visibility = View.GONE
+                }
+                else {
+                    binding.noVoicePosted.visibility = View.VISIBLE
+                }
+                recyclerView.adapter = VoiceAdapter(voices)
+            }
+        })
     }
 
     private fun updateStats() {
-        lifecycleScope.launch {
-            val response = UserApi.retrofitService.getMyInfo(MainActivity.token)
-            binding.voicesNumber.text = response.voices.toString()
-            binding.followersNumber.text = response.followers.toString()
-            binding.followingNumber.text = response.followings.toString()
+        if (username == null) {
+            lifecycleScope.launch {
+                val response = UserApi.retrofitService.getMyInfo(MainActivity.token)
+                binding.voicesNumber.text = response.voices.toString()
+                binding.followersNumber.text = response.followers.toString()
+                binding.followingNumber.text = response.followings.toString()
+            }
+        }
+        else {
+            lifecycleScope.launch {
+                val response = UserApi.retrofitService.getInfo(MainActivity.token, username!!)
+                binding.voicesNumber.text = response.voices.toString()
+                binding.followersNumber.text = response.followers.toString()
+                binding.followingNumber.text = response.followings.toString()
+            }
         }
     }
 

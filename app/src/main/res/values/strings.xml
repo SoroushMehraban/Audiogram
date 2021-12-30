@@ -45,4 +45,5 @@
     <string name="followed">Followed ✓</string>
     <string name="upload_voice">+ Upload Voice</string>
     <string name="zero">0</string>
+    <string name="no_voices_yet">No voices yet</string>
 </resources>

@@ -21,6 +21,21 @@ data class InfoResponse (
     val isFollowed: Boolean?
 )
 
+data class VoiceResponse(
+    val success: Boolean,
+    val message: String?,
+    val voices: List<UserVoiceResponse>?
+)
+
+data class UserVoiceResponse(
+    val username: String,
+    val imageUrl: String,
+    val voiceUrl: String,
+    val publishDate: String,
+    val likeNumbers: Int,
+    val commentNumbers: Int
+)
+
 data class SearchResponse (
     val success: Boolean,
     val message: String?,

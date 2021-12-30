@@ -50,7 +50,7 @@
                 />
         </androidx.constraintlayout.widget.ConstraintLayout>
         <SeekBar
-            android:id="@+id/seekBar"
+            android:id="@+id/voice_seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
@@ -92,6 +92,7 @@
                     />
             </LinearLayout>
             <LinearLayout
+                android:id="@+id/comment_layout"
                 app:layout_constraintEnd_toStartOf="@id/like_layout"
                 app:layout_constraintTop_toTopOf="parent"
                 android:layout_width="wrap_content"

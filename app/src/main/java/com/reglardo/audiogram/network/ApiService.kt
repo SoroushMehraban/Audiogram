@@ -1,9 +1,7 @@
 package com.example.android.marsphotos.network
 
 import com.example.android.marsphotos.network.URL.BASE_URL
-import com.reglardo.audiogram.network.GeneralResponse
-import com.reglardo.audiogram.network.InfoResponse
-import com.reglardo.audiogram.network.SearchResponse
+import com.reglardo.audiogram.network.*
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.MultipartBody
@@ -108,5 +106,23 @@ interface UserApiService {
 object UserApi{
     val retrofitService : UserApiService by lazy {
         retrofit.create(UserApiService::class.java)
+    }
+}
+
+
+// ------------- Voice
+interface VoiceApiService {
+
+    @POST("voice/get_profile_voices/")
+    @FormUrlEncoded
+    suspend fun getProfileVoices(
+        @Field("token") token: String,
+        @Field("username") username: String?
+    ): VoiceResponse
+}
+
+object VoiceApi{
+    val retrofitService : VoiceApiService by lazy {
+        retrofit.create(VoiceApiService::class.java)
     }
 }

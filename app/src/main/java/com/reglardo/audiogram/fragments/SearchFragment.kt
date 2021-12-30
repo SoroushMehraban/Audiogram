@@ -49,13 +49,11 @@ class SearchFragment : Fragment() {
                         val recyclerView = binding.searchRecyclerView
                         if (users.isNotEmpty()) {
                             binding.noUserFound.visibility = View.INVISIBLE
-
-                            recyclerView.adapter = SearchAdapter(this, users)
                         }
                         else {
                             binding.noUserFound.visibility = View.VISIBLE
-                            recyclerView.adapter = SearchAdapter(this, listOf())
                         }
+                        recyclerView.adapter = SearchAdapter(this, users)
 
                     } else {
                         Log.i("Error", "success false")
