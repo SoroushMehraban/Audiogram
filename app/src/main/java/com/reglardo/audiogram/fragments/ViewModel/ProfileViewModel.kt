@@ -10,6 +10,7 @@ import com.reglardo.audiogram.network.GeneralResponse
 import com.reglardo.audiogram.network.InfoResponse
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
+import java.lang.Exception
 
 class ProfileViewModel : ViewModel() {
 
@@ -22,56 +23,68 @@ class ProfileViewModel : ViewModel() {
 
     fun getProfile(username: String) {
         viewModelScope.launch {
-            val response = UserApi.retrofitService.getInfo(MainActivity.token, username)
-            profileResponse.value = response
+            try {
+                val response = UserApi.retrofitService.getInfo(MainActivity.token, username)
+                profileResponse.value = response
+            } catch (e: Exception) { }
         }
     }
 
     fun getMyProfile() {
         viewModelScope.launch {
-            val response = UserApi.retrofitService.getMyInfo(MainActivity.token)
-            profileResponse.value = response
+            try {
+                val response = UserApi.retrofitService.getMyInfo(MainActivity.token)
+                profileResponse.value = response
+            } catch (e: Exception) { }
         }
     }
 
     fun updateProfile(username: String?) {
         viewModelScope.launch {
-            val response = if (username != null) {
-                UserApi.retrofitService.getInfo(MainActivity.token, username)
-            } else {
-                UserApi.retrofitService.getMyInfo(MainActivity.token)
-            }
-            profileUpdateResponse.value = response
+            try {
+                val response = if (username != null) {
+                    UserApi.retrofitService.getInfo(MainActivity.token, username)
+                } else {
+                    UserApi.retrofitService.getMyInfo(MainActivity.token)
+                }
+                profileUpdateResponse.value = response
+            } catch (e: Exception) { }
         }
     }
 
     fun followUser(username: String) {
         viewModelScope.launch {
-            val response = UserApi.retrofitService.followUser(MainActivity.token, username)
-            followResponse.value = response
+            try {
+                val response = UserApi.retrofitService.followUser(MainActivity.token, username)
+                followResponse.value = response
+            } catch (e: Exception) { }
         }
     }
 
     fun unfollowUser(username: String) {
         viewModelScope.launch {
-            val response = UserApi.retrofitService.unfollowUser(MainActivity.token, username)
-            unfollowResponse.value = response
+            try {
+                val response = UserApi.retrofitService.unfollowUser(MainActivity.token, username)
+                unfollowResponse.value = response
+            } catch (e: Exception) { }
         }
     }
 
     fun uploadProfilePhoto(image: MultipartBody.Part) {
         viewModelScope.launch {
-            val response = UserApi.retrofitService.uploadImage(MainActivity.token, image)
-            profileImageUpdateResponse.value = response
+            try {
+                val response = UserApi.retrofitService.uploadImage(MainActivity.token, image)
+                profileImageUpdateResponse.value = response
+            } catch (e: Exception) { }
         }
     }
 
     fun uploadVoice(voice: MultipartBody.Part) {
         viewModelScope.launch {
-            val response = UserApi.retrofitService.uploadVoice(MainActivity.token, voice)
-            voiceUploadResponse.value = response
+            try {
+                val response = UserApi.retrofitService.uploadVoice(MainActivity.token, voice)
+                voiceUploadResponse.value = response
+            } catch (e: Exception) { }
         }
     }
-
-
 }

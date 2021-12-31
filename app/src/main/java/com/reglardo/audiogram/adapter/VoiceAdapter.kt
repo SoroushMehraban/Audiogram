@@ -16,6 +16,7 @@ import com.reglardo.audiogram.R
 import com.reglardo.audiogram.fragments.CommentFragment
 import com.reglardo.audiogram.network.UserVoiceResponse
 import kotlinx.coroutines.*
+import java.lang.Exception
 
 
 class VoiceAdapter(
@@ -65,22 +66,24 @@ class VoiceAdapter(
 
         holder.likeImg.setOnClickListener {
             GlobalScope.launch {
-                val response = VoiceApi.retrofitService.like(MainActivity.token, voiceResponse.id)
-                response.let {
-                    if (it.success) {
-                        withContext(Dispatchers.Main) {
-                            if (isLiked) {
-                                isLiked = false
-                                holder.likeImg.setImageResource(R.drawable.heart)
+                try {
+                    val response = VoiceApi.retrofitService.like(MainActivity.token, voiceResponse.id)
+                    response.let {
+                        if (it.success) {
+                            withContext(Dispatchers.Main) {
+                                if (isLiked) {
+                                    isLiked = false
+                                    holder.likeImg.setImageResource(R.drawable.heart)
+                                }
+                                else {
+                                    isLiked = true
+                                    holder.likeImg.setImageResource(R.drawable.heart_active)
+                                }
+                                holder.likeNumber.text = it.message
                             }
-                            else {
-                                isLiked = true
-                                holder.likeImg.setImageResource(R.drawable.heart_active)
-                            }
-                            holder.likeNumber.text = it.message
                         }
                     }
-                }
+                } catch (e: Exception) {}
             }
         }
 

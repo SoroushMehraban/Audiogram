@@ -40,6 +40,7 @@ class RegisterActivity : AppCompatActivity() {
                     passwordConfirmation
                 )
                 viewModel.signUp(signUpData)
+
                 viewModel.signUpAuthenticationResponse.observe(this, {
                     if (it.success) {
                         val intent = Intent(this, LoginActivity::class.java)
@@ -47,6 +48,12 @@ class RegisterActivity : AppCompatActivity() {
                         startActivity(intent)
                     } else {
                         binding.errorMsg.text = "Error: ${it.message}"
+                    }
+                })
+
+                viewModel.connectionFailed.observe(this, { connectionFailed ->
+                    if (connectionFailed == true) {
+                        binding.errorMsg.text = getString(R.string.connection_error)
                     }
                 })
             }

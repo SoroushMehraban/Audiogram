@@ -11,7 +11,6 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
-import com.google.gson.Gson
 import com.reglardo.audiogram.MainActivity
 import com.reglardo.audiogram.R
 import com.reglardo.audiogram.databinding.ActivityLoginBinding
@@ -60,6 +59,7 @@ class LoginActivity : AppCompatActivity() {
             } else {
                 val loginData = LoginData(username, password)
                 viewModel.login(loginData)
+
                 viewModel.loginAuthenticationResponse.observe(this, {
                     if (it.success) {
                         MainActivity.token = it.message
@@ -69,9 +69,16 @@ class LoginActivity : AppCompatActivity() {
                         binding.errorMsg.text = "Error: ${it.message}"
                     }
                 })
+
+                viewModel.connectionFailed.observe(this, { connectionFailed ->
+                    if (connectionFailed == true) {
+                        binding.errorMsg.text = getString(R.string.connection_error)
+                    }
+                })
             }
         }
     }
+
 
     private fun openMainActivity() {
         val intent = Intent(this, MainActivity::class.java)

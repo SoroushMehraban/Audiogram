@@ -7,14 +7,17 @@ import com.example.android.marsphotos.network.UserApi
 import com.reglardo.audiogram.MainActivity
 import com.reglardo.audiogram.network.SearchResponse
 import kotlinx.coroutines.launch
+import java.lang.Exception
 
 class SearchViewModel: ViewModel() {
     val searchResponse: MutableLiveData<SearchResponse> = MutableLiveData()
 
     fun searchUsername(username: String) {
         viewModelScope.launch {
-            val response = UserApi.retrofitService.searchUsers(MainActivity.token, username)
-            searchResponse.value = response
+            try {
+                val response = UserApi.retrofitService.searchUsers(MainActivity.token, username)
+                searchResponse.value = response
+            } catch (e: Exception) {}
         }
     }
 }

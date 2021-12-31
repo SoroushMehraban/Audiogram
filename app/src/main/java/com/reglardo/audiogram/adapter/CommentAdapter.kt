@@ -1,23 +1,15 @@
 package com.reglardo.audiogram.adapter
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.android.marsphotos.network.URL
-import com.reglardo.audiogram.MainActivity
-import com.reglardo.audiogram.MediaViewModel
 import com.reglardo.audiogram.R
-import com.reglardo.audiogram.fragments.RecorderFragment
 import com.reglardo.audiogram.network.VoiceCommentResponse
-import org.w3c.dom.Comment
 
 
 class CommentAdapter(

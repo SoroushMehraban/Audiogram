@@ -7,11 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
+import com.example.android.marsphotos.network.UserApi
 import com.example.android.marsphotos.network.VoiceApi
 import com.reglardo.audiogram.MainActivity
 import com.reglardo.audiogram.adapter.VoiceAdapter
 import com.reglardo.audiogram.databinding.FragmentHomeBinding
 import kotlinx.coroutines.launch
+import java.lang.Exception
 
 
 class HomeFragment : Fragment() {
@@ -49,19 +51,21 @@ class HomeFragment : Fragment() {
 
     private fun updateHomeVoices(fragment: HomeFragment) {
         lifecycleScope.launch {
-            val response = VoiceApi.retrofitService.getHomeVoices(MainActivity.token)
-            response.let {
-                if (it.success) {
-                    val voices = it.voices!!
-                    val recyclerView = binding.homeVoiceRecyclerView
-                    if (voices.isNotEmpty()) {
-                        binding.noVoicePosted.visibility = View.GONE
-                    } else {
-                        binding.noVoicePosted.visibility = View.VISIBLE
+            try {
+                val response = VoiceApi.retrofitService.getHomeVoices(MainActivity.token)
+                response.let {
+                    if (it.success) {
+                        val voices = it.voices!!
+                        val recyclerView = binding.homeVoiceRecyclerView
+                        if (voices.isNotEmpty()) {
+                            binding.noVoicePosted.visibility = View.GONE
+                        } else {
+                            binding.noVoicePosted.visibility = View.VISIBLE
+                        }
+                        recyclerView.adapter = VoiceAdapter(fragment, voices, "fromHomeFragment")
                     }
-                    recyclerView.adapter = VoiceAdapter(fragment, voices, "fromHomeFragment")
                 }
-            }
+            } catch (e: Exception) {}
         }
     }
 }

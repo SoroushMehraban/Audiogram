@@ -47,4 +47,5 @@
     <string name="zero">0</string>
     <string name="no_voices_yet">No voices yet</string>
     <string name="insert_comment_here">Insert comment here</string>
+    <string name="connection_error">Cannot connect to server</string>
 </resources>

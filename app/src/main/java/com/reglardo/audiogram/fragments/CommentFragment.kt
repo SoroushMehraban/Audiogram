@@ -13,6 +13,7 @@ import com.reglardo.audiogram.MainActivity
 import com.reglardo.audiogram.adapter.CommentAdapter
 import com.reglardo.audiogram.databinding.FragmentCommentBinding
 import kotlinx.coroutines.launch
+import java.lang.Exception
 
 private const val ARG_PARAM1 = "param1"
 
@@ -54,9 +55,13 @@ class CommentFragment : Fragment() {
                 val comment = binding.commentField.text.toString()
                 binding.commentField.setText("")
                 if (comment != "") {
-                    val response = VoiceApi.retrofitService.comment(MainActivity.token, voiceId!!, comment)
-                    if (response.success) {
-                        updateComments()
+                    try {
+                        val response = VoiceApi.retrofitService.comment(MainActivity.token, voiceId!!, comment)
+                        if (response.success) {
+                            updateComments()
+                        }
+                    } catch (e: Exception) {
+                        binding.commentField.setText(comment)
                     }
                 }
             }
@@ -66,9 +71,11 @@ class CommentFragment : Fragment() {
 
     private fun updateComments() {
         lifecycleScope.launch {
-            val response = VoiceApi.retrofitService.getComments(MainActivity.token, voiceId!!)
-            if (response.success)
-                binding.commentRecyclerView.adapter = CommentAdapter(response.comments!!)
+            try {
+                val response = VoiceApi.retrofitService.getComments(MainActivity.token, voiceId!!)
+                if (response.success)
+                    binding.commentRecyclerView.adapter = CommentAdapter(response.comments!!)
+            } catch (e: Exception) {}
         }
     }
 

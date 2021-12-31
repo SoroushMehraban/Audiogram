@@ -33,6 +33,7 @@ import okhttp3.MediaType
 import okhttp3.MultipartBody
 import java.io.File
 import okhttp3.RequestBody
+import java.lang.Exception
 
 
 private const val ARG_PARAM1 = "param1"
@@ -196,36 +197,42 @@ class ProfileFragment : Fragment() {
     private fun getMyVoices() {
         val currentFragment = this
         lifecycleScope.launch {
-            val response = VoiceApi.retrofitService.getProfileVoices(MainActivity.token, null)
-            if (response.success) {
-                val voices = response.voices!!
-                val recyclerView = binding.profileVoiceRecyclerView
-                if (voices.isNotEmpty()) {
-                    binding.noVoicePosted.visibility = View.GONE
-                }
-                else {
-                    binding.noVoicePosted.visibility = View.VISIBLE
-                }
+            try {
+                val response = VoiceApi.retrofitService.getProfileVoices(MainActivity.token, null)
+                if (response.success) {
+                    val voices = response.voices!!
+                    val recyclerView = binding.profileVoiceRecyclerView
+                    if (voices.isNotEmpty()) {
+                        binding.noVoicePosted.visibility = View.GONE
+                    }
+                    else {
+                        binding.noVoicePosted.visibility = View.VISIBLE
+                    }
 
-                recyclerView.adapter = VoiceAdapter(currentFragment, voices, "fromProfileFragment")
-            }
+                    recyclerView.adapter = VoiceAdapter(currentFragment, voices, "fromProfileFragment")
+                }
+            } catch (e: Exception) {}
         }
     }
 
     private fun getProfileVoices(username: String) {
         val currentFragment = this
         lifecycleScope.launch {
-            val response = VoiceApi.retrofitService.getProfileVoices(MainActivity.token, username)
-            if (response.success) {
-                val voices = response.voices!!
-                val recyclerView = binding.profileVoiceRecyclerView
-                if (voices.isNotEmpty()) {
-                    binding.noVoicePosted.visibility = View.GONE
+            try {
+                val response =
+                    VoiceApi.retrofitService.getProfileVoices(MainActivity.token, username)
+                if (response.success) {
+                    val voices = response.voices!!
+                    val recyclerView = binding.profileVoiceRecyclerView
+                    if (voices.isNotEmpty()) {
+                        binding.noVoicePosted.visibility = View.GONE
+                    } else {
+                        binding.noVoicePosted.visibility = View.VISIBLE
+                    }
+                    recyclerView.adapter =
+                        VoiceAdapter(currentFragment, voices, "fromSearchFragment")
                 }
-                else {
-                    binding.noVoicePosted.visibility = View.VISIBLE
-                }
-                recyclerView.adapter = VoiceAdapter(currentFragment, voices, "fromSearchFragment")
+            } catch (e: Exception) {
             }
         }
     }
@@ -233,18 +240,22 @@ class ProfileFragment : Fragment() {
     private fun updateStats() {
         if (username == null) {
             lifecycleScope.launch {
-                val response = UserApi.retrofitService.getMyInfo(MainActivity.token)
-                binding.voicesNumber.text = response.voices.toString()
-                binding.followersNumber.text = response.followers.toString()
-                binding.followingNumber.text = response.followings.toString()
+                try {
+                    val response = UserApi.retrofitService.getMyInfo(MainActivity.token)
+                    binding.voicesNumber.text = response.voices.toString()
+                    binding.followersNumber.text = response.followers.toString()
+                    binding.followingNumber.text = response.followings.toString()
+                } catch (e: Exception) { }
             }
         }
         else {
             lifecycleScope.launch {
-                val response = UserApi.retrofitService.getInfo(MainActivity.token, username!!)
-                binding.voicesNumber.text = response.voices.toString()
-                binding.followersNumber.text = response.followers.toString()
-                binding.followingNumber.text = response.followings.toString()
+                try {
+                    val response = UserApi.retrofitService.getInfo(MainActivity.token, username!!)
+                    binding.voicesNumber.text = response.voices.toString()
+                    binding.followersNumber.text = response.followers.toString()
+                    binding.followingNumber.text = response.followings.toString()
+                } catch (e: Exception) {}
             }
         }
     }
