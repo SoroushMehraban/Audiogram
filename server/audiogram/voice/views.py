@@ -52,6 +52,7 @@ def get_profile_voices(request):
                 "isLiked": Like.objects.filter(voice=voice, user=request_user).count() == 1
             })
 
+
         return JsonResponse({"success": True, "voices": voices_result})
 
 

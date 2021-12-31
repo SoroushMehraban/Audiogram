@@ -206,6 +206,7 @@ class ProfileFragment : Fragment() {
                 else {
                     binding.noVoicePosted.visibility = View.VISIBLE
                 }
+
                 recyclerView.adapter = VoiceAdapter(currentFragment, voices, "fromProfileFragment")
             }
         }
@@ -280,6 +281,7 @@ class ProfileFragment : Fragment() {
             profileViewModel.voiceUploadResponse.observe(this, {
                 if (it.success) {
                     updateStats()
+                    updateVoices()
                 }
             })
         }
