@@ -1,8 +1,11 @@
 package com.reglardo.audiogram.authentication
 
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.viewModels
 import com.reglardo.audiogram.R
 import com.reglardo.audiogram.databinding.ActivityRegisterBinding
@@ -18,6 +21,7 @@ class RegisterActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.registerBtn.setOnClickListener {
+            hideKeyboard(it)
             val firstName = binding.firstName.text.toString()
             val lastName = binding.lastName.text.toString()
             val email = binding.emailAddress.text.toString()
@@ -48,5 +52,11 @@ class RegisterActivity : AppCompatActivity() {
             }
 
         }
+    }
+
+    private fun hideKeyboard(view: View) {
+        val inputMethodManager =
+            getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 }

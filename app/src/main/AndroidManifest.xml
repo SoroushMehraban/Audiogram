@@ -21,9 +21,11 @@
         android:theme="@style/Theme.Audiogram" >
         <activity
             android:name=".authentication.RegisterActivity"
+            android:screenOrientation="portrait"
             android:exported="false" />
         <activity
             android:name=".authentication.LoginActivity"
+            android:screenOrientation="portrait"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,9 +35,11 @@
         </activity>
         <activity
             android:name=".RecordingListActivity"
+            android:screenOrientation="portrait"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="portrait"
             android:exported="false" />
 
         <service android:name=".TimerService" />
