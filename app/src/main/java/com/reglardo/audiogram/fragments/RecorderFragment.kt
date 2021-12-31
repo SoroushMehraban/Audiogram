@@ -788,14 +788,6 @@ class RecorderFragment : Fragment() {
         }
     }
 
-    private fun getFilePath(): String {
-        val contextWrapper = ContextWrapper(activity?.applicationContext)
-        val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
-
-        val file = File(audioDirectory, "testRecording.mp3")
-        return file.path
-    }
-
     private fun showGetRecordingNameDialog(title: String) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
         builder.setTitle(title)
@@ -806,7 +798,7 @@ class RecorderFragment : Fragment() {
         builder.setView(input)
 
         builder.setPositiveButton("Save", DialogInterface.OnClickListener { dialog, which ->
-            var givenName = input.text.toString()
+            var givenName = input.text.toString().replace(" ", "_")
 
             val contextWrapper = ContextWrapper(activity?.applicationContext)
             val audioDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
