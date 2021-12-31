@@ -4,6 +4,7 @@ import android.content.ContextWrapper
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
+import android.view.View
 import com.reglardo.audiogram.adapter.RecordingAdapter
 import com.reglardo.audiogram.adapter.TagAdapter
 import com.reglardo.audiogram.databinding.ActivityRecordingListBinding
@@ -35,5 +36,9 @@ class RecordingListActivity : AppCompatActivity() {
 
         val recyclerView = binding.recordingRecyclerView
         recyclerView.adapter = RecordingAdapter(mainActivityState, listOfFiles)
+        if (listOfFiles.size == 0)
+            binding.noVoiceYet.visibility = View.VISIBLE
+        else
+            binding.noVoiceYet.visibility = View.GONE
     }
 }
