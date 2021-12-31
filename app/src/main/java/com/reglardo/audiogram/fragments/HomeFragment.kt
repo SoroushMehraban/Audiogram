@@ -1,6 +1,7 @@
 package com.reglardo.audiogram.fragments
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +17,7 @@ import kotlinx.coroutines.launch
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+    private lateinit var updateThread: Thread
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +29,13 @@ class HomeFragment : Fragment() {
     ): View? {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
 
+        Thread {
+            while (true) {
+                updateHomeVoices(this)
+                Thread.sleep(2000)
+            }
+        }.start()
+
         return binding.root
     }
 
@@ -34,6 +43,11 @@ class HomeFragment : Fragment() {
         super.onResume()
 
         val fragment = this
+        updateHomeVoices(fragment)
+    }
+
+
+    private fun updateHomeVoices(fragment: HomeFragment) {
         lifecycleScope.launch {
             val response = VoiceApi.retrofitService.getHomeVoices(MainActivity.token)
             response.let {
@@ -42,8 +56,7 @@ class HomeFragment : Fragment() {
                     val recyclerView = binding.homeVoiceRecyclerView
                     if (voices.isNotEmpty()) {
                         binding.noVoicePosted.visibility = View.GONE
-                    }
-                    else {
+                    } else {
                         binding.noVoicePosted.visibility = View.VISIBLE
                     }
                     recyclerView.adapter = VoiceAdapter(fragment, voices, "fromHomeFragment")
