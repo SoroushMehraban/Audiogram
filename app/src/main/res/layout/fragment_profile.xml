@@ -162,9 +162,11 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/profile_voice_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/upload_voice"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/list_voice"
         android:scrollbars="vertical"/>
     <TextView
         android:id="@+id/no_voice_posted"
